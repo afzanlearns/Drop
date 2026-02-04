@@ -1,5 +1,3 @@
-import { webcrypto } from 'node:crypto';
-
 // Use standard Web Crypto API if available (Node 19+), otherwise fallback to node implementation 
 // logic effectively handled by standard Math.random is insufficient.
 // Excluding ambiguous characters: 0, O, 1, I, l
@@ -9,14 +7,13 @@ const ALPHABET_LENGTH = ALPHABET.length;
 export function generateRoomCode(length: number = 8): string {
     // Use crypto.getRandomValues for better entropy
     const array = new Uint8Array(length);
-    // In a browser or modern Node env, crypto is available globally
-    const cryptoToCheck = typeof crypto !== 'undefined' ? crypto : webcrypto as unknown as Crypto;
+    const cryptoInstance = globalThis.crypto;
 
-    if (!cryptoToCheck) {
+    if (!cryptoInstance) {
         throw new Error("Crypto API not available");
     }
 
-    cryptoToCheck.getRandomValues(array);
+    cryptoInstance.getRandomValues(array);
 
     let result = '';
     for (let i = 0; i < length; i++) {

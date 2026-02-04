@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileIcon, FileText, Image as ImageIcon, Code } from 'lucide-react';
+import { UploadCloud, FileIcon, FileText, Image as ImageIcon, Code, Download, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { detectContentType, ContentType } from '@/services/ContentService';
+import { exportRoomAsZip } from '@/services/ExportService';
 
 interface ContentItemData {
     id: string;
@@ -24,7 +26,6 @@ export function Timeline({ roomCode }: { roomCode: string }) {
 
     const handleDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault();
-        // Check if leaving the window or just the element
         if (e.currentTarget.contains(e.relatedTarget as Node)) return;
         setIsDragging(false);
     }, []);
@@ -59,7 +60,10 @@ export function Timeline({ roomCode }: { roomCode: string }) {
         }, ...prev]);
     };
 
-    // Paste Listener
+    const deleteItem = (id: string) => {
+        setItems(prev => prev.filter(i => i.id !== id));
+    };
+
     useEffect(() => {
         const handlePaste = (e: ClipboardEvent) => {
             if (e.clipboardData?.files.length) {
@@ -68,7 +72,6 @@ export function Timeline({ roomCode }: { roomCode: string }) {
             } else {
                 const text = e.clipboardData?.getData('text');
                 if (text) {
-                    // Simple heuristic: if it looks like code?
                     addItem(text, ContentType.TEXT);
                 }
             }
@@ -84,7 +87,6 @@ export function Timeline({ roomCode }: { roomCode: string }) {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            {/* Drop Overlay */}
             <AnimatePresence>
                 {isDragging && (
                     <motion.div
@@ -105,7 +107,17 @@ export function Timeline({ roomCode }: { roomCode: string }) {
                 )}
             </AnimatePresence>
 
-            <div className="flex flex-col gap-4 py-4">
+            <div className="flex justify-between items-end mb-2 px-1">
+                <h2 className="text-sm font-bold text-zinc-400 tracking-wider uppercase">Timeline</h2>
+                {items.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => exportRoomAsZip(items, roomCode)}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download All
+                    </Button>
+                )}
+            </div>
+
+            <div className="flex flex-col gap-4 pb-20">
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 text-zinc-400 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl">
                         <UploadCloud className="w-12 h-12 mb-4 opacity-50" />
@@ -114,7 +126,7 @@ export function Timeline({ roomCode }: { roomCode: string }) {
                     </div>
                 ) : (
                     items.map((item, idx) => (
-                        <ItemCard key={item.id} item={item} idx={idx} />
+                        <ItemCard key={item.id} item={item} idx={idx} onDelete={() => deleteItem(item.id)} />
                     ))
                 )}
             </div>
@@ -122,30 +134,35 @@ export function Timeline({ roomCode }: { roomCode: string }) {
     );
 }
 
-function ItemCard({ item, idx }: { item: ContentItemData, idx: number }) {
+function ItemCard({ item, idx, onDelete }: { item: ContentItemData, idx: number, onDelete: () => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
+            layout
         >
-            <Card className="p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 shadow-sm hover:shadow-md transition-shadow">
+            <Card className="p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 shadow-sm hover:shadow-md transition-shadow group">
                 <div className="bg-zinc-50 dark:bg-zinc-900/50 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center text-xs text-zinc-500 font-mono">
                     <span className="uppercase font-bold tracking-wider flex items-center gap-2">
                         {getIcon(item.type)}
                         {item.type}
                     </span>
-                    <span>{item.timestamp.toLocaleTimeString()}</span>
+                    <div className="flex items-center gap-2">
+                        <span>{item.timestamp.toLocaleTimeString()}</span>
+                        <button onClick={onDelete} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100">
+                            <Trash2 className="w-3 h-3" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="p-5">
                     {item.type === ContentType.TEXT ? (
-                        <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/90">
+                        <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/90 font-medium">
                             {item.content as string}
                         </pre>
                     ) : item.type === ContentType.IMAGE && item.content instanceof File ? (
                         <div className="rounded-lg overflow-hidden bg-zinc-100 dark:bg-black/20">
-                            {/* In real app, use URL.createObjectURL or proper upload url */}
                             <img
                                 src={URL.createObjectURL(item.content)}
                                 alt="Shared content"

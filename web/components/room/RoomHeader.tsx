@@ -24,6 +24,10 @@ export function RoomHeader({ roomCode }: { roomCode: string }) {
                         <span className="font-mono font-medium tracking-wider">{roomCode}</span>
                     </div>
 
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 text-xs font-medium">
+                        <span>24h</span>
+                    </div>
+
                     <Button variant="ghost" size="sm" onClick={copyCode} title="Copy Link">
                         <Copy className="w-4 h-4" />
                     </Button>

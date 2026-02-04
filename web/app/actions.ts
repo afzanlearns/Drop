@@ -2,10 +2,18 @@
 
 import { redirect } from 'next/navigation';
 import { generateRoomCode } from '@/services/RoomService';
+import { DB } from '@/lib/db';
 
 export async function createRoom() {
     const code = generateRoomCode();
-    // TODO: Save room to database/storage
+
+    await DB.createRoom({
+        id: crypto.randomUUID(),
+        code,
+        createdAt: new Date().toISOString(),
+        expiresAt: null
+    });
+
     redirect(`/${code}`);
 }
 

@@ -1,9 +1,15 @@
 import { Timeline } from '@/components/room/Timeline';
 import { RoomHeader } from '@/components/room/RoomHeader';
+import { DB } from '@/lib/db';
+import { notFound } from 'next/navigation';
 
-// Next.js 15+ Params is a Promise
 export default async function RoomPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = await params;
+    const room = await DB.getRoom(roomCode);
+
+    if (!room) {
+        notFound();
+    }
 
     return (
         <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 font-mono">

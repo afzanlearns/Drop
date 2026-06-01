@@ -1,5 +1,0 @@
-# Uploaded files - don't commit user content
-*
-
-# But keep the directory structure
-!.gitignore

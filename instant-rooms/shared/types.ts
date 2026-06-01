@@ -4,6 +4,8 @@ export enum AccessMode {
   DROP_ONLY = "drop_only",
 }
 
+export type ViewMode = "list" | "compact" | "board";
+
 export enum ContentType {
   TEXT = "text",
   CODE = "code",
@@ -14,12 +16,14 @@ export enum ContentType {
 
 export interface Room {
   code: string;
+  name: string | null;
   accessMode: AccessMode;
   createdAt: string;
   expiresAt: string | null;
   isPinned: boolean;
   contentCount: number;
   lastActivity: string;
+  viewCount: number;
 }
 
 export interface ContentMetadata {
@@ -44,6 +48,10 @@ export interface ContentItem {
   createdAt: string;
   version: number;
   isDeleted: boolean;
+  uploaderName: string | null;
+  itemExpiresAt: string | null;
+  isPinned: boolean;
+  tags?: string[];
 }
 
 export interface VersionSnapshot {
@@ -67,10 +75,13 @@ export interface ErrorResponse {
 export interface CreateRoomRequest {
   expiryHours?: 1 | 24 | 168;
   accessMode?: AccessMode;
+  name?: string;
+  customCode?: string;
 }
 
 export interface CreateRoomResponse {
   room: Room;
+  creatorToken: string;
 }
 
 export interface AddTextContentRequest {
@@ -79,6 +90,9 @@ export interface AddTextContentRequest {
   content: string;
   title?: string;
   language?: string;
+  uploaderName?: string;
+  itemExpiryHours?: 1 | 6 | 24;
+  tags?: string[];
 }
 
 export interface ContentListResponse {
@@ -91,3 +105,4 @@ export interface HistoryResponse {
 }
 
 export type ExpiryOption = 1 | 24 | 168;
+export type ItemExpiryOption = 1 | 6 | 24;

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Room, ContentItem, VersionSnapshot, AccessMode, ExpiryOption } from "../../../shared/types";
+import type { Room, ContentItem, VersionSnapshot, AccessMode, ExpiryOption, ItemExpiryOption, ViewMode } from "../../../shared/types";
 import { roomApi, contentApi } from "../utils/api";
 
 interface Toast {
@@ -16,6 +16,7 @@ interface RoomStore {
   isUploading: boolean;
   toasts: Toast[];
   showHistory: boolean;
+  viewMode: ViewMode;
 
   // Actions
   fetchRoom: (code: string) => Promise<void>;
@@ -26,14 +27,21 @@ interface RoomStore {
     content: string;
     title?: string;
     language?: string;
+    uploaderName?: string;
+    itemExpiryHours?: ItemExpiryOption;
+    tags?: string[];
   }) => Promise<void>;
-  uploadFile: (file: File) => Promise<void>;
+  uploadFile: (file: File, uploaderName?: string, itemExpiryHours?: ItemExpiryOption, tags?: string[]) => Promise<void>;
   deleteContent: (contentId: string) => Promise<void>;
+  pinContent: (contentId: string, pinned: boolean) => Promise<void>;
+  updateTags: (contentId: string, tags: string[]) => Promise<void>;
   updateAccessMode: (mode: AccessMode) => Promise<void>;
   updateExpiry: (hours: ExpiryOption) => Promise<void>;
   pinRoom: (pinned: boolean) => Promise<void>;
+  updateRoomName: (name: string) => Promise<void>;
   restoreSnapshot: (snapshotAt: string) => Promise<void>;
   setShowHistory: (show: boolean) => void;
+  setViewMode: (mode: ViewMode) => void;
   addToast: (toast: Omit<Toast, "id">) => void;
   removeToast: (id: string) => void;
   reset: () => void;
@@ -47,12 +55,18 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   isUploading: false,
   toasts: [],
   showHistory: false,
+  viewMode: "list",
 
   fetchRoom: async (code) => {
     set({ isLoading: true });
     try {
       const room = await roomApi.get(code);
-      set({ room, isLoading: false });
+      const savedView = localStorage.getItem(`room_view_${code.toUpperCase()}`);
+      set({ 
+        room, 
+        isLoading: false,
+        viewMode: (savedView as ViewMode) || "list"
+      });
     } catch {
       set({ isLoading: false });
       get().addToast({ type: "error", message: "Room not found or has expired." });
@@ -94,12 +108,12 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     }
   },
 
-  uploadFile: async (file) => {
+  uploadFile: async (file, uploaderName, itemExpiryHours, tags) => {
     const room = get().room;
     if (!room) return;
     set({ isUploading: true });
     try {
-      const item = await contentApi.upload(file, room.code);
+      const item = await contentApi.upload(file, room.code, uploaderName, itemExpiryHours, tags);
       set((state) => ({
         contentItems: [...state.contentItems, item],
         isUploading: false,
@@ -112,14 +126,49 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   },
 
   deleteContent: async (contentId) => {
+    const room = get().room;
+    if (!room) return;
     try {
-      await contentApi.delete(contentId);
+      await contentApi.delete(contentId, room.code);
       set((state) => ({
         contentItems: state.contentItems.filter((i) => i.id !== contentId),
       }));
       get().addToast({ type: "success", message: "Item removed." });
     } catch {
       get().addToast({ type: "error", message: "Failed to delete item." });
+    }
+  },
+
+  pinContent: async (contentId, pinned) => {
+    const room = get().room;
+    if (!room) return;
+    try {
+      const updated = await contentApi.pin(contentId, room.code, pinned);
+      set((state) => ({
+        contentItems: state.contentItems
+          .map((i) => (i.id === contentId ? updated : i))
+          .sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }),
+      }));
+      get().addToast({ type: "success", message: pinned ? "Item pinned." : "Item unpinned." });
+    } catch {
+      get().addToast({ type: "error", message: "Failed to update pin." });
+    }
+  },
+
+  updateTags: async (contentId, tags) => {
+    const room = get().room;
+    if (!room) return;
+    try {
+      const updated = await contentApi.updateTags(contentId, room.code, tags);
+      set((state) => ({
+        contentItems: state.contentItems.map((i) => (i.id === contentId ? updated : i)),
+      }));
+    } catch {
+      get().addToast({ type: "error", message: "Failed to update tags." });
     }
   },
 
@@ -162,6 +211,17 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     }
   },
 
+  updateRoomName: async (name) => {
+    const room = get().room;
+    if (!room) return;
+    try {
+      const updated = await roomApi.updateName(room.code, name);
+      set({ room: updated });
+    } catch {
+      get().addToast({ type: "error", message: "Failed to update room name." });
+    }
+  },
+
   restoreSnapshot: async (snapshotAt) => {
     const room = get().room;
     if (!room) return;
@@ -175,6 +235,14 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   },
 
   setShowHistory: (show) => set({ showHistory: show }),
+  
+  setViewMode: (mode) => {
+    const room = get().room;
+    if (room) {
+      localStorage.setItem(`room_view_${room.code.toUpperCase()}`, mode);
+    }
+    set({ viewMode: mode });
+  },
 
   addToast: (toast) => {
     const id = crypto.randomUUID();
@@ -186,5 +254,5 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
 
   reset: () =>
-    set({ room: null, contentItems: [], history: [], isLoading: false, isUploading: false }),
+    set({ room: null, contentItems: [], history: [], isLoading: false, isUploading: false, viewMode: "list" }),
 }));

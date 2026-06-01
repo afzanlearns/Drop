@@ -1,16 +1,16 @@
 import { useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { useRoomStore } from "../store/roomStore";
 import RoomHeader from "../components/room/RoomHeader";
 import DropZone from "../components/room/DropZone";
 import Timeline from "../components/room/Timeline";
 import HistoryPanel from "../components/room/HistoryPanel";
 import { AccessMode } from "../../../shared/types";
+import { useCreator } from "../hooks/useCreator";
 
 export default function RoomPage() {
   const { code } = useParams<{ code: string }>();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const {
     room,
     contentItems,
@@ -32,7 +32,15 @@ export default function RoomPage() {
     return () => reset();
   }, [load]);
 
-  // Redirect if room not found after loading
+  useEffect(() => {
+    if (room) {
+      document.title = `${room.name ?? room.code} — Instant Rooms`;
+    } else {
+      document.title = "Instant Rooms";
+    }
+    return () => { document.title = "Instant Rooms"; };
+  }, [room]);
+
   useEffect(() => {
     if (!isLoading && !room && code) {
       const timer = setTimeout(() => navigate("/"), 2000);
@@ -40,48 +48,82 @@ export default function RoomPage() {
     }
   }, [isLoading, room, code, navigate]);
 
-  if (isLoading) {
-    return <RoomSkeleton />;
-  }
+  const { isCreator } = useCreator(room?.code);
+
+  if (isLoading) return <RoomSkeleton />;
 
   if (!room) {
     return (
-      <div className="min-h-[100dvh] bg-zinc-50 flex items-center justify-center">
+      <div
+        className="min-h-[100dvh] flex items-center justify-center"
+        style={{ background: "var(--color-bg)" }}
+      >
         <div className="text-center">
-          <p className="text-zinc-400 text-sm">Room not found or has expired.</p>
-          <p className="text-zinc-300 text-xs mt-1">Redirecting...</p>
+          <p className="text-[0.9rem] font-medium" style={{ color: "var(--color-text-secondary)" }}>
+            Room not found or has expired.
+          </p>
+          <p className="text-[0.78rem] mt-1" style={{ color: "var(--color-text-muted)" }}>
+            Redirecting…
+          </p>
         </div>
       </div>
     );
   }
 
-  const isReadOnly = room.accessMode === AccessMode.READ_ONLY;
-  const isDropOnly = room.accessMode === AccessMode.DROP_ONLY;
+  const isReadOnly = room.accessMode === AccessMode.READ_ONLY && !isCreator;
+  const isDropOnly = room.accessMode === AccessMode.DROP_ONLY && !isCreator;
 
   return (
-    <div className="min-h-[100dvh] bg-zinc-50 flex flex-col">
+    <div
+      className="h-[100dvh] flex flex-col overflow-hidden"
+      style={{ background: "var(--color-bg)", color: "var(--color-text-primary)" }}
+    >
       <RoomHeader />
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Main content area */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-          {/* Left: Drop zone / Input (hidden in read-only) */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden gap-0">
+          {/* Left: Drop zone */}
           {!isReadOnly && (
-            <div className="lg:w-80 xl:w-96 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-zinc-200 bg-white overflow-y-auto">
+            <div
+              className="w-full md:w-[272px] flex-shrink-0 flex flex-col overflow-y-auto"
+              style={{
+                borderRight:  "1px solid var(--color-border)",
+                background:   "var(--color-surface)",
+              }}
+            >
               <DropZone />
             </div>
           )}
 
           {/* Right: Timeline */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" style={{ background: "var(--color-bg)" }}>
             {isDropOnly ? (
               <div className="flex items-center justify-center h-full min-h-[300px]">
                 <div className="text-center px-6">
-                  <div className="w-12 h-12 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-amber-600 text-xl">↓</span>
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+                    style={{
+                      background: "rgba(217,119,6,0.10)",
+                      boxShadow:  "0 4px 20px rgba(217,119,6,0.15)",
+                    }}
+                  >
+                    <span
+                      className="text-2xl font-black"
+                      style={{ color: "var(--color-accent-amber)" }}
+                    >
+                      ↓
+                    </span>
                   </div>
-                  <p className="text-sm font-medium text-zinc-600">Drop-only mode</p>
-                  <p className="text-xs text-zinc-400 mt-1">
+                  <p
+                    className="text-[1.1rem] font-black tracking-tight mb-2"
+                    style={{ color: "var(--color-text-primary)" }}
+                  >
+                    Drop-only mode
+                  </p>
+                  <p
+                    className="text-[0.875rem] leading-[1.6] max-w-[280px] mx-auto"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     You can add content but cannot view what others have shared.
                   </p>
                 </div>
@@ -93,45 +135,76 @@ export default function RoomPage() {
         </div>
 
         {/* History Panel Overlay */}
-        <AnimatePresence>
-          {showHistory && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 35 }}
-              className="absolute inset-y-0 right-0 w-full sm:w-[420px] z-20 shadow-2xl"
-            >
-              <HistoryPanel />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {showHistory && (
+          <div
+            className="absolute inset-y-0 right-0 w-full sm:w-[440px] z-20"
+            style={{
+              background:  "var(--color-surface)",
+              borderLeft:  "1px solid var(--color-border)",
+              boxShadow:   "var(--shadow-xl)",
+            }}
+          >
+            <HistoryPanel />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
+/* ── Loading Skeleton ── */
 function RoomSkeleton() {
   return (
-    <div className="min-h-[100dvh] bg-zinc-50 flex flex-col">
+    <div
+      className="h-[100dvh] flex flex-col overflow-hidden"
+      style={{ background: "var(--color-bg)" }}
+    >
       {/* Header skeleton */}
-      <div className="h-14 bg-white border-b border-zinc-200 px-6 flex items-center gap-4">
-        <div className="skeleton w-28 h-5 rounded" />
-        <div className="skeleton w-20 h-5 rounded" />
+      <div
+        className="h-[64px] px-5 flex items-center gap-4 flex-shrink-0"
+        style={{
+          background:   "var(--color-surface)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
+        <div className="skeleton w-9 h-9 rounded-lg" />
+        <div className="skeleton w-36 h-6 rounded-lg" />
+        <div className="skeleton w-16 h-5 rounded-full ml-2" />
         <div className="ml-auto flex gap-2">
-          <div className="skeleton w-16 h-7 rounded" />
-          <div className="skeleton w-16 h-7 rounded" />
+          <div className="skeleton w-24 h-8 rounded-lg" />
+          <div className="skeleton w-20 h-8 rounded-lg" />
         </div>
       </div>
 
-      <div className="flex-1 flex">
-        <div className="w-80 border-r border-zinc-200 bg-white p-6 flex flex-col gap-4">
-          <div className="skeleton w-full h-32 rounded-xl" />
+      {/* Activity bar skeleton */}
+      <div
+        className="h-[40px] px-5 flex items-center gap-4 flex-shrink-0"
+        style={{
+          background:   "var(--color-surface-alt)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
+        <div className="skeleton w-16 h-4 rounded" />
+        <div className="skeleton w-20 h-4 rounded" />
+        <div className="skeleton w-28 h-4 rounded" />
+      </div>
+
+      {/* Body skeleton */}
+      <div className="flex-1 flex overflow-hidden">
+        <div
+          className="w-[272px] flex-shrink-0 p-4 flex flex-col gap-4"
+          style={{
+            background:  "var(--color-surface)",
+            borderRight: "1px solid var(--color-border)",
+          }}
+        >
+          <div className="skeleton w-full h-36 rounded-xl" />
+          <div className="skeleton w-full h-20 rounded-xl" />
           <div className="skeleton w-full h-20 rounded-xl" />
         </div>
-        <div className="flex-1 p-6 flex flex-col gap-4">
+        <div className="flex-1 p-5 flex flex-col gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton w-full h-24 rounded-2xl" />
+            <div key={i} className="skeleton w-full h-28 rounded-xl" />
           ))}
         </div>
       </div>

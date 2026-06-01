@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, XCircle, Info, X } from "@phosphor-icons/react";
 import { useRoomStore } from "../../store/roomStore";
 
@@ -6,36 +5,24 @@ export function ToastContainer() {
   const { toasts, removeToast } = useRoomStore();
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
-      <AnimatePresence>
-        {toasts.map((toast) => (
-          <motion.div
-            key={toast.id}
-            initial={{ opacity: 0, x: 20, scale: 0.97 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 20, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-diffuse border max-w-xs
-              ${toast.type === "success"
-                ? "bg-white border-emerald-100 text-zinc-700"
-                : toast.type === "error"
-                ? "bg-white border-red-100 text-zinc-700"
-                : "bg-white border-zinc-100 text-zinc-700"
-              }`}
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 pointer-events-none">
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className="pointer-events-auto flex items-center gap-3 px-[16px] py-[10px] rounded-[8px] bg-text-primary text-bg font-body font-medium tracking-[-0.01em] text-[0.875rem] shadow-lg animate-toast-slide-up"
+        >
+          {toast.type === "success" && <CheckCircle size={16} className="text-brand flex-shrink-0" weight="fill" />}
+          {toast.type === "error" && <XCircle size={16} className="text-accent-red flex-shrink-0" weight="fill" />}
+          {toast.type === "info" && <Info size={16} className="text-accent-blue flex-shrink-0" weight="fill" />}
+          <p className="flex-1">{toast.message}</p>
+          <button
+            onClick={() => removeToast(toast.id)}
+            className="ml-2 text-bg/50 hover:text-bg transition-colors flex-shrink-0 active:scale-95"
           >
-            {toast.type === "success" && <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" weight="fill" />}
-            {toast.type === "error" && <XCircle size={16} className="text-red-500 flex-shrink-0" weight="fill" />}
-            {toast.type === "info" && <Info size={16} className="text-blue-500 flex-shrink-0" weight="fill" />}
-            <p className="text-sm">{toast.message}</p>
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="ml-1 text-zinc-300 hover:text-zinc-500 transition-colors flex-shrink-0"
-            >
-              <X size={13} />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            <X size={14} weight="bold" />
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

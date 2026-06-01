@@ -420,7 +420,7 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section
-        className="relative min-h-[70vh] flex items-center px-6 md:px-12 pt-28 md:pt-36 pb-16"
+        className="relative min-h-[70vh] flex items-center px-6 md:px-12 pt-20 md:pt-24 pb-16"
         style={{ background: "var(--color-bg)" }}
       >
         {/* Background glow */}

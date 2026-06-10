@@ -34,83 +34,49 @@ export default function FileBlob({ item }: Props) {
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="group w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-      style={{
-        background: "var(--color-surface-alt)",
-        border:     "1px solid var(--color-border)",
-      }}
+      className="group w-full flex items-center gap-3.5 p-3.5 rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
       onMouseEnter={(e) => {
         if (!downloading) {
-          (e.currentTarget as HTMLElement).style.background   = "var(--color-brand-soft)";
-          (e.currentTarget as HTMLElement).style.borderColor  = "var(--color-brand)";
-          (e.currentTarget as HTMLElement).style.boxShadow    = "var(--shadow-brand)";
-          (e.currentTarget as HTMLElement).style.transform    = "translateY(-1px)";
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--color-brand)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-brand)";
         }
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background  = "var(--color-surface-alt)";
         (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-        (e.currentTarget as HTMLElement).style.boxShadow   = "none";
-        (e.currentTarget as HTMLElement).style.transform   = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
       }}
     >
-      {/* Icon */}
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200"
-        style={{
-          background: "var(--color-surface)",
-          boxShadow:  "var(--shadow-xs)",
-        }}
+      <div className="w-10 h-10 rounded-[6px] flex items-center justify-center flex-shrink-0"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-xs)" }}
       >
-        <File size={22} weight="bold" style={{ color: "var(--color-brand)" }} />
+        <File size={20} weight="bold" style={{ color: "var(--color-brand)" }} />
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0 text-left">
-        <p
-          className="text-[0.875rem] font-semibold truncate"
-          style={{ color: "var(--color-text-primary)" }}
-        >
+        <p className="text-[0.85rem] font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
           {filename}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
-          {size && (
-            <span
-              className="text-[0.72rem]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              {size}
-            </span>
-          )}
-          {mime && size && (
-            <span style={{ color: "var(--color-border)" }}>·</span>
-          )}
+          {size && <span className="text-[0.7rem]" style={{ color: "var(--color-text-muted)" }}>{size}</span>}
+          {mime && size && <span style={{ color: "var(--color-border)" }}>\u00B7</span>}
           {mime && (
-            <span
-              className="text-[0.72rem] truncate max-w-[140px]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
+            <span className="text-[0.7rem] truncate max-w-[120px]" style={{ color: "var(--color-text-muted)" }}>
               {mime}
             </span>
           )}
         </div>
       </div>
 
-      {/* Download icon */}
-      <div
-        className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
+      <div className="flex-shrink-0 w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-150"
         style={{ color: "var(--color-text-muted)" }}
       >
         {downloading ? (
-          <span
-            className="w-4 h-4 rounded-full border-2 animate-spin"
-            style={{
-              borderColor:    "var(--color-border)",
-              borderTopColor: "var(--color-brand)",
-            }}
+          <span className="w-3.5 h-3.5 rounded-full border-2 animate-spin"
+            style={{ borderColor: "var(--color-border)", borderTopColor: "var(--color-brand)" }}
           />
         ) : (
-          <DownloadSimple size={18} weight="bold" />
+          <DownloadSimple size={16} weight="bold" />
         )}
       </div>
     </button>

@@ -1,5 +1,5 @@
-import { Sun, Moon } from "@phosphor-icons/react";
 import { useTheme } from "../../hooks/useTheme";
+import { Sun, Moon } from "@phosphor-icons/react";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -7,22 +7,19 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="w-9 h-9 rounded-full flex items-center justify-center
-                 bg-surface-alt border border-border
-                 hover:bg-surface-2 transition-colors duration-150
-                 text-text-secondary hover:text-text-primary"
+      className="w-8 h-8 flex items-center justify-center rounded-[5px] transition-all duration-150"
+      style={{ color: "var(--color-text-secondary)" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
+        (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent";
+        (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)";
+      }}
       aria-label="Toggle theme"
     >
-      <span
-        style={{ transition: "opacity 150ms ease" }}
-        className="flex items-center justify-center"
-      >
-        {theme === "dark" ? (
-          <Moon size={16} weight="fill" />
-        ) : (
-          <Sun size={16} weight="fill" />
-        )}
-      </span>
+      {theme === "dark" ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
     </button>
   );
 }

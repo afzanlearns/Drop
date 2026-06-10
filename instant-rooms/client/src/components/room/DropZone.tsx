@@ -27,7 +27,6 @@ function detectCode(content: string): boolean {
   return patterns.some((p) => p.test(content));
 }
 
-/* ── Tag Input ── */
 function TagInput({ tags, setTags }: { tags: string[]; setTags: (t: string[]) => void }) {
   const [inputValue, setInputValue] = useState("");
 
@@ -42,28 +41,19 @@ function TagInput({ tags, setTags }: { tags: string[]; setTags: (t: string[]) =>
   };
 
   return (
-    <div
-      className="flex flex-wrap gap-1.5 min-h-[40px] p-2 rounded-lg transition-all"
-      style={{
-        background:   "var(--color-surface-alt)",
-        border:       "1px solid var(--color-border)",
-      }}
+    <div className="flex flex-wrap gap-1.5 min-h-[36px] p-1.5 rounded-[5px] transition-all"
+      style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
     >
       {tags.map((tag, i) => (
-        <span
-          key={i}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
-          style={{
-            background: "var(--color-brand-soft)",
-            color:      "var(--color-brand)",
-          }}
+        <span key={i}
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.68rem] font-semibold"
+          style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
         >
           #{tag}
-          <button
-            onClick={() => setTags(tags.filter((_, j) => j !== i))}
-            className="opacity-70 hover:opacity-100 transition-opacity"
+          <button onClick={() => setTags(tags.filter((_, j) => j !== i))}
+            className="opacity-60 hover:opacity-100 transition-opacity"
           >
-            <X size={10} weight="bold" />
+            <X size={9} weight="bold" />
           </button>
         </span>
       ))}
@@ -72,15 +62,14 @@ function TagInput({ tags, setTags }: { tags: string[]; setTags: (t: string[]) =>
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={() => addTag(inputValue)}
-        placeholder={tags.length === 0 ? "Add tags…" : ""}
-        className="flex-1 min-w-[100px] text-[0.8rem] outline-none bg-transparent"
+        placeholder={tags.length === 0 ? "Add tags\u2026" : ""}
+        className="flex-1 min-w-[80px] text-[0.8rem] outline-none bg-transparent"
         style={{ color: "var(--color-text-primary)" }}
       />
     </div>
   );
 }
 
-/* ── Auto-delete Selector ── */
 function AutoDeleteSelector({
   value,
   onChange,
@@ -95,50 +84,34 @@ function AutoDeleteSelector({
     <div className="relative w-full">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full text-[0.82rem] px-3 py-2.5 rounded-lg transition-colors font-medium"
-        style={{
-          background:  "var(--color-surface-alt)",
-          border:      "1px solid var(--color-border)",
-          color:       "var(--color-text-primary)",
-        }}
+        className="flex items-center justify-between w-full text-[0.82rem] px-3 py-2 rounded-[5px] transition-colors font-medium"
+        style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)", color: "var(--color-text-primary)" }}
         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "var(--color-border-strong)")}
         onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)")}
       >
         <span className="flex items-center gap-2">
-          <Timer size={15} weight="bold" style={{ color: "var(--color-text-secondary)" }} />
+          <Timer size={14} weight="bold" style={{ color: "var(--color-text-secondary)" }} />
           Auto-delete: <span style={{ color: "var(--color-brand)" }}>{currentLabel}</span>
         </span>
-        <CaretDown size={13} weight="bold" style={{ color: "var(--color-text-muted)" }} />
+        <CaretDown size={12} weight="bold" style={{ color: "var(--color-text-muted)" }} />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div
-            className="absolute left-0 right-0 bottom-full mb-2 z-20 p-1"
-            style={{
-              background:   "var(--color-surface)",
-              border:       "1px solid var(--color-border)",
-              borderRadius: "var(--radius-md)",
-              boxShadow:    "var(--shadow-xl)",
-            }}
+          <div className="absolute left-0 right-0 bottom-full mb-1.5 z-20 p-1"
+            style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-xl)" }}
           >
             {EXPIRY_OPTIONS.map((o) => (
-              <button
-                key={o.value}
+              <button key={o.value}
                 onClick={() => { onChange(o.value as ItemExpiryOption | 0); setOpen(false); }}
-                className="w-full text-left px-3 py-2.5 text-[0.82rem] font-medium rounded-lg transition-colors"
-                style={{
-                  background: value === o.value ? "var(--color-brand-soft)" : "transparent",
-                  color:      value === o.value ? "var(--color-brand)"       : "var(--color-text-primary)",
-                }}
+                className="w-full text-left px-3 py-2 text-[0.8rem] font-medium rounded-[4px] transition-colors"
+                style={{ background: value === o.value ? "var(--color-brand-soft)" : "transparent", color: value === o.value ? "var(--color-brand)" : "var(--color-text-primary)" }}
                 onMouseEnter={(e) => {
-                  if (value !== o.value)
-                    (e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)";
+                  if (value !== o.value) (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
                 }}
                 onMouseLeave={(e) => {
-                  if (value !== o.value)
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                  if (value !== o.value) (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
                 {o.label}
@@ -151,7 +124,6 @@ function AutoDeleteSelector({
   );
 }
 
-/* ── DropZone ── */
 export default function DropZone() {
   const navigate = useNavigate();
   const { uploadFile, addTextContent, isUploading, room } = useRoomStore();
@@ -226,103 +198,70 @@ export default function DropZone() {
     setGuestName(nameInput);
   };
 
-  /* ── shared label style ── */
   const sectionLabel: React.CSSProperties = {
-    fontSize:      "0.7rem",
-    fontWeight:    700,
+    fontSize: "0.68rem",
+    fontWeight: 600,
     textTransform: "uppercase" as const,
-    letterSpacing: "0.1em",
-    color:         "var(--color-text-muted)",
-    marginBottom:  "0.5rem",
+    letterSpacing: "0.08em",
+    color: "var(--color-text-muted)",
+    marginBottom: "0.375rem",
   };
 
   return (
-    <div
-      className="flex flex-col h-full"
-      style={{ background: "var(--color-surface)" }}
-    >
-      {/* ── A: Identity ── */}
-      <div
-        className="p-4"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
-      >
+    <div className="flex flex-col h-full" style={{ background: "var(--color-bg)" }}>
+      <div className="p-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
         <p style={sectionLabel}>Posting as</p>
-        <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
-          style={{
-            background: "var(--color-surface-alt)",
-            border:     "1px solid var(--color-border)",
-          }}
+        <div className="flex items-center gap-2 px-2.5 py-2 rounded-[5px] transition-all"
+          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
         >
-          <User size={15} weight="bold" style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          <User size={14} weight="bold" style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
           <input
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onBlur={handleSaveName}
             onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); }}
-            placeholder="Your name…"
+            placeholder="Your name\u2026"
             maxLength={100}
-            className="flex-1 text-[0.875rem] font-medium bg-transparent border-none outline-none"
+            className="flex-1 text-[0.85rem] font-medium bg-transparent border-none outline-none"
             style={{ color: "var(--color-text-primary)" }}
           />
         </div>
       </div>
 
-      {/* ── B: Upload / Text area ── */}
-      <div
-        className="p-4"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
-      >
-        {/* Drop zone */}
-        <div
-          {...getRootProps()}
-          className="rounded-xl py-7 px-4 text-center cursor-pointer transition-all duration-200 mb-3"
+      <div className="p-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
+        <div {...getRootProps()}
+          className="rounded-[8px] py-6 px-4 text-center cursor-pointer transition-all duration-150 mb-3"
           style={{
-            border:     `2px dashed ${isDragActive ? "var(--color-brand)" : "var(--color-border)"}`,
-            background: isDragActive ? "var(--color-brand-soft)" : "var(--color-surface-alt)",
-            transform:  isDragActive ? "scale(1.01)" : "scale(1)",
+            border: `1.5px dashed ${isDragActive ? "var(--color-brand)" : "var(--color-border)"}`,
+            background: isDragActive ? "var(--color-brand-soft)" : "var(--color-surface)",
           }}
         >
           <input {...getInputProps()} />
           {isUploading ? (
             <div className="flex flex-col items-center gap-2">
-              <div
-                className="w-8 h-8 rounded-full border-[3px] animate-spin"
-                style={{
-                  borderColor:      "var(--color-border)",
-                  borderTopColor:   "var(--color-brand)",
-                }}
+              <div className="w-7 h-7 rounded-full border-2 animate-spin"
+                style={{ borderColor: "var(--color-border)", borderTopColor: "var(--color-brand)" }}
               />
-              <p
-                className="text-[0.75rem] font-semibold"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                Uploading…
+              <p className="text-[0.75rem] font-medium" style={{ color: "var(--color-text-secondary)" }}>
+                Uploading\u2026
               </p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
-                style={{
-                  background: isDragActive ? "var(--color-brand)" : "var(--color-surface)",
-                  boxShadow:  "var(--shadow-sm)",
-                }}
+              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center"
+                style={{ background: isDragActive ? "var(--color-brand)" : "var(--color-surface-alt)" }}
               >
-                <UploadSimple
-                  size={20}
-                  weight="bold"
+                <UploadSimple size={18} weight="bold"
                   style={{ color: isDragActive ? "#fff" : "var(--color-brand)" }}
                 />
               </div>
-              <p
-                className="text-[0.875rem] font-semibold"
+              <p className="text-[0.85rem] font-semibold"
                 style={{ color: isDragActive ? "var(--color-brand)" : "var(--color-text-primary)" }}
               >
                 {isDragActive ? "Drop it!" : "Drop files here"}
               </p>
               {!isDragActive && (
-                <p className="text-[0.72rem]" style={{ color: "var(--color-text-muted)" }}>
+                <p className="text-[0.7rem]" style={{ color: "var(--color-text-muted)" }}>
                   Images, PDFs, any file up to 10MB
                 </p>
               )}
@@ -332,56 +271,47 @@ export default function DropZone() {
 
         {mode === "idle" ? (
           <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => openTextMode(false)}
-              className="btn-secondary flex items-center justify-center gap-2 py-2.5 text-[0.82rem]"
+            <button onClick={() => openTextMode(false)}
+              className="btn-secondary flex items-center justify-center gap-2 py-2 text-[0.8rem]"
             >
-              <TextT size={15} weight="bold" /> Text
+              <TextT size={14} weight="bold" /> Text
             </button>
-            <button
-              onClick={() => openTextMode(true)}
-              className="btn-secondary flex items-center justify-center gap-2 py-2.5 text-[0.82rem]"
+            <button onClick={() => openTextMode(true)}
+              className="btn-secondary flex items-center justify-center gap-2 py-2 text-[0.8rem]"
             >
-              <Code size={15} weight="bold" /> Code
+              <Code size={14} weight="bold" /> Code
             </button>
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
-            {/* Title */}
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title (optional)"
-              className="input-field text-[0.875rem]"
+              className="input-field text-[0.85rem]"
             />
 
-            {/* Code-detected badge */}
             {detectedAsCode && (
-              <span
-                className="inline-flex items-center gap-1.5 text-[0.68rem] font-semibold px-2 py-0.5 rounded-full w-fit"
-                style={{
-                  background: "rgba(37,99,235,0.10)",
-                  color:      "var(--color-accent-blue)",
-                }}
+              <span className="inline-flex items-center gap-1.5 text-[0.65rem] font-semibold px-2 py-0.5 rounded-full w-fit"
+                style={{ background: "rgba(0,113,227,0.08)", color: "var(--color-accent-blue)" }}
               >
-                <Code size={11} weight="bold" /> Code detected
+                <Code size={10} weight="bold" /> Code detected
               </span>
             )}
 
-            {/* Textarea */}
             <textarea
               ref={textareaRef}
               value={textValue}
               onChange={handleTextChange}
               onPaste={handlePaste}
-              placeholder={mode === "code" ? "Paste your code here…" : "Type or paste text…"}
+              placeholder={mode === "code" ? "Paste your code here\u2026" : "Type or paste text\u2026"}
               rows={6}
-              className="w-full px-3 py-2.5 rounded-lg text-[0.875rem] outline-none resize-none transition-all"
+              className="w-full px-3 py-2 rounded-[5px] text-[0.85rem] outline-none resize-none transition-all"
               style={{
-                background:  detectedAsCode ? "var(--color-graphite, #1A1817)" : "var(--color-surface-alt)",
-                color:       detectedAsCode ? "#F0EDE8" : "var(--color-text-primary)",
-                fontFamily:  detectedAsCode ? "var(--font-mono)" : "var(--font-body)",
-                border:      "1px solid var(--color-border)",
+                background: detectedAsCode ? "#1A1A1A" : "var(--color-surface-alt)",
+                color: detectedAsCode ? "#EAEAEA" : "var(--color-text-primary)",
+                fontFamily: detectedAsCode ? "var(--font-mono)" : "var(--font-sans)",
+                border: "1px solid var(--color-border)",
               }}
               onFocus={(e) => (e.target.style.borderColor = "var(--color-brand)")}
               onBlur={(e)  => (e.target.style.borderColor = "var(--color-border)")}
@@ -391,27 +321,22 @@ export default function DropZone() {
               <button
                 onClick={handleSubmitText}
                 disabled={!textValue.trim() || isUploading}
-                className="btn-primary flex-1 justify-center py-2.5 text-[0.875rem]"
+                className="btn-primary flex-1 justify-center py-2 text-[0.85rem]"
               >
-                <Plus size={15} weight="bold" /> Add
+                <Plus size={14} weight="bold" /> Add
               </button>
-              <button
-                onClick={handleCancel}
-                className="btn-ghost px-3 py-2.5"
+              <button onClick={handleCancel}
+                className="btn-ghost px-3 py-2"
                 style={{ border: "1px solid var(--color-border)" }}
               >
-                <X size={16} weight="bold" />
+                <X size={15} weight="bold" />
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── C: Item settings ── */}
-      <div
-        className="p-4 flex flex-col gap-3"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
-      >
+      <div className="p-4 flex flex-col gap-3" style={{ borderBottom: "1px solid var(--color-border)" }}>
         {isCreator && (
           <div>
             <p style={sectionLabel}>Auto-delete</p>
@@ -424,29 +349,20 @@ export default function DropZone() {
         </div>
       </div>
 
-      {/* ── D: Hint ── */}
       {mode === "idle" && (
         <div className="px-4 py-3 flex-1">
-          <p
-            className="text-[0.78rem] text-center leading-relaxed"
-            style={{ color: "var(--color-text-muted)" }}
-          >
+          <p className="text-[0.75rem] text-center leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
             You can also paste directly anywhere on the page
           </p>
         </div>
       )}
 
-      {/* ── E: Back / Close ── */}
-      <div
-        className="p-4 mt-auto"
-        style={{ borderTop: "1px solid var(--color-border)" }}
-      >
-        <button
-          onClick={() => navigate("/")}
-          className="btn-ghost w-full justify-center py-2.5 text-[0.875rem] font-semibold"
+      <div className="p-4 mt-auto" style={{ borderTop: "1px solid var(--color-border)" }}>
+        <button onClick={() => navigate("/")}
+          className="btn-ghost w-full justify-center py-2 text-[0.85rem] font-medium"
           style={{ border: "1px solid var(--color-border)" }}
         >
-          <ArrowLeft size={16} weight="bold" /> Back to home
+          <ArrowLeft size={15} weight="bold" /> Back to home
         </button>
       </div>
     </div>

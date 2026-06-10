@@ -109,58 +109,43 @@ export default function RoomHeader() {
     setShowExportMenu(false);
   };
 
-  /* ── shared inline style helpers ── */
-  const surfaceCard: React.CSSProperties = {
-    background:   "var(--color-surface)",
-    border:       "1px solid var(--color-border)",
-    borderRadius: "var(--radius-sm)",
-    boxShadow:    "var(--shadow-xs)",
-  };
-
   const pillBtn: React.CSSProperties = {
-    display:        "inline-flex",
-    alignItems:     "center",
-    gap:            "0.375rem",
-    padding:        "0.375rem 0.75rem",
-    background:     "var(--color-surface-alt)",
-    border:         "1px solid var(--color-border)",
-    borderRadius:   "var(--radius-sm)",
-    fontSize:       "0.8rem",
-    fontWeight:     600,
-    color:          "var(--color-text-primary)",
-    cursor:         "pointer",
-    transition:     "all 0.15s ease",
-    whiteSpace:     "nowrap" as const,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.375rem",
+    padding: "0.25rem 0.625rem",
+    background: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-sm)",
+    fontSize: "0.78rem",
+    fontWeight: 500,
+    color: "var(--color-text-primary)",
+    cursor: "pointer",
+    transition: "all 0.12s ease",
+    whiteSpace: "nowrap" as const,
   };
 
   return (
     <>
-      {/* ── Main Header ── */}
-      <header
-        className="h-[64px] z-10 flex-shrink-0 px-5 flex items-center justify-between sticky top-0"
-        style={{
-          background:   "var(--color-surface)",
-          borderBottom: "1px solid var(--color-border)",
-          boxShadow:    "var(--shadow-xs)",
-        }}
+      <header className="h-14 z-10 flex-shrink-0 px-5 flex items-center justify-between sticky top-0"
+        style={{ background: "var(--color-bg)", borderBottom: "1px solid var(--color-border)" }}
       >
-        {/* LEFT — identity */}
         <div className="flex items-center gap-3 flex-1 min-w-0 group">
           <button
             onClick={() => navigate("/")}
-            className="w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 flex-shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-[5px] transition-all duration-150 flex-shrink-0"
             style={{ color: "var(--color-text-secondary)" }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)";
-              (e.currentTarget as HTMLElement).style.color      = "var(--color-text-primary)";
+              (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
+              (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color      = "var(--color-text-secondary)";
+              (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)";
             }}
             title="Back to home"
           >
-            <ArrowLeft size={20} weight="bold" />
+            <ArrowLeft size={18} weight="bold" />
           </button>
 
           {editingName ? (
@@ -173,197 +158,151 @@ export default function RoomHeader() {
                 onKeyDown={handleNameKeyDown}
                 maxLength={100}
                 placeholder="Room name..."
-                className="text-sm font-medium px-3 py-1.5 rounded-lg outline-none w-40"
+                className="text-sm font-medium px-2.5 py-1.5 rounded-[5px] outline-none w-40"
                 style={{
-                  background:  "var(--color-surface-alt)",
-                  border:      "1px solid var(--color-brand)",
-                  color:       "var(--color-text-primary)",
-                  boxShadow:   "0 0 0 3px var(--color-brand-soft)",
+                  background: "var(--color-surface-alt)",
+                  border: "1px solid var(--color-brand)",
+                  color: "var(--color-text-primary)",
+                  boxShadow: "0 0 0 3px var(--color-brand-soft)",
                 }}
               />
-              <button
-                onClick={handleSaveName}
-                className="p-1.5 rounded-lg transition-colors"
+              <button onClick={handleSaveName} className="p-1.5 rounded-[5px] transition-colors"
                 style={{ color: "var(--color-brand)" }}
               >
-                <Check size={14} weight="bold" />
+                <Check size={13} weight="bold" />
               </button>
-              <button
-                onClick={() => setEditingName(false)}
-                className="p-1.5 rounded-lg transition-colors"
+              <button onClick={() => setEditingName(false)} className="p-1.5 rounded-[5px] transition-colors"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                <X size={14} weight="bold" />
+                <X size={13} weight="bold" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-3 cursor-default min-w-0">
-              <span
-                className="font-black tracking-tight truncate leading-none uppercase"
-                style={{
-                  color:    "var(--color-text-primary)",
-                  fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
-                }}
+              <span className="font-bold tracking-tight truncate leading-none uppercase"
+                style={{ color: "var(--color-text-primary)", fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
               >
                 {room.name ? room.name : room.code}
               </span>
 
-              {/* Active badge */}
-              <span
-                className="hidden sm:inline-flex items-center gap-1 text-[0.65rem] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                style={{
-                  background: "rgba(22,163,74,0.10)",
-                  color:      "var(--color-accent-green)",
-                }}
+              <span className="hidden sm:inline-flex items-center gap-1 text-[0.6rem] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "rgba(22,163,74,0.08)", color: "var(--color-accent-green)" }}
               >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: "var(--color-accent-green)" }}
-                />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-accent-green)" }} />
                 Active
               </span>
 
               {isCreator && (
                 <button
                   onClick={handleStartEditName}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+                  className="p-1 rounded-[5px] opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
                   style={{ color: "var(--color-text-muted)" }}
                   onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"}
                   onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"}
                   title="Edit room name"
                 >
-                  <PencilSimple size={14} />
+                  <PencilSimple size={13} />
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* CENTER — view toggle + settings pills */}
-        <div className="hidden md:flex items-center gap-3 flex-1 justify-center">
-          {/* Segmented view control */}
+        <div className="hidden md:flex items-center gap-2 flex-1 justify-center">
           <div className="segment-control">
-            <button
-              onClick={() => setViewMode("list")}
+            <button onClick={() => setViewMode("list")}
               className={`segment-btn ${viewMode === "list" ? "active" : ""}`}
             >
-              <List size={13} /> List
+              <List size={12} /> List
             </button>
-            <button
-              onClick={() => setViewMode("compact")}
+            <button onClick={() => setViewMode("compact")}
               className={`segment-btn ${viewMode === "compact" ? "active" : ""}`}
             >
-              <SquaresFour size={13} /> Compact
+              <SquaresFour size={12} /> Compact
             </button>
-            <button
-              onClick={() => setViewMode("board")}
+            <button onClick={() => setViewMode("board")}
               className={`segment-btn hidden lg:inline-flex ${viewMode === "board" ? "active" : ""}`}
             >
-              <Columns size={13} /> Board
+              <Columns size={12} /> Board
             </button>
           </div>
 
-          <div
-            className="w-px h-5"
-            style={{ background: "var(--color-border)" }}
-          />
+          <div className="w-px h-4" style={{ background: "var(--color-border)" }} />
 
-          {/* Access mode pill */}
           <div className="relative">
             <button
               onClick={() => {
-                if (isCreator) {
-                  setShowAccessMenu((v) => !v);
-                  setShowExpiryMenu(false);
-                  setShowExportMenu(false);
-                }
+                if (isCreator) { setShowAccessMenu((v) => !v); setShowExpiryMenu(false); setShowExportMenu(false); }
               }}
               style={{
                 ...pillBtn,
                 color: isExpiringSoon ? "var(--color-accent-amber)" : "var(--color-text-primary)",
                 borderColor: isExpiringSoon ? "rgba(217,119,6,0.3)" : "var(--color-border)",
-                background: isExpiringSoon ? "rgba(217,119,6,0.08)" : "var(--color-surface-alt)",
+                background: isExpiringSoon ? "rgba(217,119,6,0.06)" : "var(--color-surface)",
                 cursor: isCreator ? "pointer" : "default",
               }}
             >
-              {room.accessMode === AccessMode.READ_ONLY
-                ? <EyeSlash size={14} weight="bold" />
-                : <Eye size={14} weight="bold" />}
+              {room.accessMode === AccessMode.READ_ONLY ? <EyeSlash size={13} weight="bold" /> : <Eye size={13} weight="bold" />}
               {currentAccessLabel}
-              {isCreator && <CaretDown size={12} weight="bold" style={{ color: "var(--color-text-muted)" }} />}
+              {isCreator && <CaretDown size={11} weight="bold" style={{ color: "var(--color-text-muted)" }} />}
             </button>
 
             {showAccessMenu && isCreator && (
               <DropMenu onClose={() => setShowAccessMenu(false)}>
                 {ACCESS_MODES.map((mode) => (
-                  <button
-                    key={mode.value}
+                  <button key={mode.value}
                     onClick={() => { updateAccessMode(mode.value); setShowAccessMenu(false); }}
-                    className="w-full text-left px-4 py-3 text-sm transition-colors duration-150"
+                    className="w-full text-left px-4 py-2.5 text-sm transition-colors duration-100"
                     style={{
-                      background:  room.accessMode === mode.value ? "var(--color-brand-soft)" : "transparent",
-                      color:       room.accessMode === mode.value ? "var(--color-brand)" : "var(--color-text-primary)",
+                      background: room.accessMode === mode.value ? "var(--color-brand-soft)" : "transparent",
+                      color: room.accessMode === mode.value ? "var(--color-brand)" : "var(--color-text-primary)",
                       borderBottom: "1px solid var(--color-border-soft)",
                     }}
                     onMouseEnter={(e) => {
                       if (room.accessMode !== mode.value)
-                        (e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)";
+                        (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
                     }}
                     onMouseLeave={(e) => {
                       if (room.accessMode !== mode.value)
                         (e.currentTarget as HTMLElement).style.background = "transparent";
                     }}
                   >
-                    <div className="font-semibold">{mode.label}</div>
-                    <div
-                      className="text-[0.72rem] mt-0.5"
-                      style={{ color: "var(--color-text-muted)" }}
-                    >
-                      {mode.desc}
-                    </div>
+                    <div className="font-medium">{mode.label}</div>
+                    <div className="text-[0.7rem] mt-0.5" style={{ color: "var(--color-text-muted)" }}>{mode.desc}</div>
                   </button>
                 ))}
               </DropMenu>
             )}
           </div>
 
-          {/* Expiry pill */}
           <div className="relative">
             <button
               onClick={() => {
-                if (isCreator) {
-                  setShowExpiryMenu((v) => !v);
-                  setShowAccessMenu(false);
-                  setShowExportMenu(false);
-                }
+                if (isCreator) { setShowExpiryMenu((v) => !v); setShowAccessMenu(false); setShowExportMenu(false); }
               }}
               style={{
                 ...pillBtn,
-                color:       isExpiringSoon ? "var(--color-accent-amber)" : "var(--color-text-primary)",
+                color: isExpiringSoon ? "var(--color-accent-amber)" : "var(--color-text-primary)",
                 borderColor: isExpiringSoon ? "rgba(217,119,6,0.3)" : "var(--color-border)",
-                background:  isExpiringSoon ? "rgba(217,119,6,0.08)" : "var(--color-surface-alt)",
-                cursor:      isCreator ? "pointer" : "default",
+                background: isExpiringSoon ? "rgba(217,119,6,0.06)" : "var(--color-surface)",
+                cursor: isCreator ? "pointer" : "default",
               }}
             >
               {isExpiringSoon
-                ? <Warning size={14} weight="bold" style={{ color: "var(--color-accent-amber)" }} />
-                : <Clock   size={14} weight="bold" />}
+                ? <Warning size={13} weight="bold" style={{ color: "var(--color-accent-amber)" }} />
+                : <Clock size={13} weight="bold" />}
               {room.isPinned ? "Pinned" : timeLeft ?? "No expiry"}
-              {isCreator && <CaretDown size={12} weight="bold" style={{ color: "var(--color-text-muted)" }} />}
+              {isCreator && <CaretDown size={11} weight="bold" style={{ color: "var(--color-text-muted)" }} />}
             </button>
 
             {showExpiryMenu && isCreator && (
               <DropMenu onClose={() => setShowExpiryMenu(false)}>
                 {EXPIRY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
+                  <button key={opt.value}
                     onClick={() => { updateExpiry(opt.value as ExpiryOption); setShowExpiryMenu(false); }}
-                    className="w-full text-left px-4 py-3 text-sm font-semibold transition-colors duration-150"
-                    style={{
-                      color:        "var(--color-text-primary)",
-                      borderBottom: "1px solid var(--color-border-soft)",
-                    }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)")}
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors duration-100"
+                    style={{ color: "var(--color-text-primary)", borderBottom: "1px solid var(--color-border-soft)" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--color-surface)")}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
                   >
                     {opt.label}
@@ -371,7 +310,7 @@ export default function RoomHeader() {
                 ))}
                 <button
                   onClick={() => { pinRoom(!room.isPinned); setShowExpiryMenu(false); }}
-                  className="w-full text-left px-4 py-3 text-sm font-semibold transition-colors duration-150"
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors duration-100"
                   style={{ color: "var(--color-brand)" }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--color-brand-soft)")}
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
@@ -383,69 +322,55 @@ export default function RoomHeader() {
           </div>
         </div>
 
-        {/* RIGHT — actions */}
         <div className="flex items-center gap-2 flex-1 justify-end">
-          {/* Creator badge */}
           {isCreator && (
-            <span
-              className="hidden lg:inline-flex items-center gap-1.5 text-[0.7rem] font-semibold px-3 py-1.5 rounded-full flex-shrink-0"
-              style={{
-                background: "var(--color-brand-soft)",
-                color:      "var(--color-brand)",
-              }}
+            <span className="hidden lg:inline-flex items-center gap-1 text-[0.65rem] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
             >
-              <Crown size={12} weight="fill" />
+              <Crown size={11} weight="fill" />
               Creator
             </span>
           )}
 
-          {/* History */}
           <button
             onClick={() => setShowHistory(true)}
-            className="hidden sm:flex items-center gap-1.5 text-[0.8rem] font-semibold px-3 py-2 rounded-lg transition-all duration-150 flex-shrink-0"
+            className="hidden sm:flex items-center gap-1.5 text-[0.78rem] font-medium px-2.5 py-1.5 rounded-[5px] transition-all duration-150 flex-shrink-0"
             style={{ color: "var(--color-text-secondary)" }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)";
-              (e.currentTarget as HTMLElement).style.color      = "var(--color-text-primary)";
+              (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
+              (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color      = "var(--color-text-secondary)";
+              (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)";
             }}
           >
-            <ClockClockwise size={15} /> History
+            <ClockClockwise size={14} /> History
           </button>
 
-          {/* Export */}
           <div className="relative">
             <button
               onClick={() => { setShowExportMenu((v) => !v); setShowAccessMenu(false); setShowExpiryMenu(false); }}
-              className="btn-primary py-2 px-3 text-[0.8rem]"
+              className="btn-primary py-1.5 px-2.5 text-[0.78rem]"
               style={{ gap: "0.375rem" }}
             >
               {isExporting ? (
-                <span
-                  className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin"
-                />
+                <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
               ) : (
-                <DownloadSimple size={15} weight="bold" />
+                <DownloadSimple size={14} weight="bold" />
               )}
               Export
-              <CaretDown size={12} weight="bold" />
+              <CaretDown size={11} weight="bold" />
             </button>
 
             {showExportMenu && (
               <DropMenu onClose={() => setShowExportMenu(false)} align="right">
                 {(["zip", "md", "pdf"] as const).map((type) => (
-                  <button
-                    key={type}
+                  <button key={type}
                     onClick={() => handleExport(type)}
-                    className="w-full text-left px-4 py-3 text-[0.8rem] font-mono font-semibold transition-colors duration-150"
-                    style={{
-                      color:        "var(--color-text-primary)",
-                      borderBottom: "1px solid var(--color-border-soft)",
-                    }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--color-surface-alt)")}
+                    className="w-full text-left px-4 py-2.5 text-[0.78rem] font-mono font-medium transition-colors duration-100"
+                    style={{ color: "var(--color-text-primary)", borderBottom: "1px solid var(--color-border-soft)" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--color-surface)")}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
                   >
                     .{type}
@@ -455,51 +380,34 @@ export default function RoomHeader() {
             )}
           </div>
 
-          <div className="w-px h-5 hidden sm:block" style={{ background: "var(--color-border)" }} />
-
+          <div className="w-px h-4 hidden sm:block" style={{ background: "var(--color-border)" }} />
           <ThemeToggle />
         </div>
       </header>
 
-      {/* ── Activity Bar ── */}
-      <div
-        className="h-[40px] px-5 flex items-center gap-5 flex-shrink-0"
-        style={{
-          borderBottom: "1px solid var(--color-border)",
-          background:   "var(--color-surface-alt)",
-        }}
+      <div className="h-9 px-5 flex items-center gap-4 flex-shrink-0"
+        style={{ borderBottom: "1px solid var(--color-border)", background: "var(--color-surface)" }}
       >
         {[
           { val: room.contentCount, label: "items"    },
           { val: `${room.viewCount} views`, label: "" },
           { val: lastActivity,       label: "last active" },
         ].map(({ val, label }, i) => (
-          <span
-            key={i}
-            className="flex items-center gap-1.5 text-[0.72rem]"
+          <span key={i} className="flex items-center gap-1.5 text-[0.7rem]"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            {i > 0 && (
-              <span
-                className="w-px h-3 mr-2"
-                style={{ background: "var(--color-border)" }}
-              />
-            )}
-            <span className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
-              {val}
-            </span>
+            {i > 0 && <span className="w-px h-3 mr-1.5" style={{ background: "var(--color-border)" }} />}
+            <span className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{val}</span>
             {label && <span>{label}</span>}
           </span>
         ))}
       </div>
 
-      {/* QR Modal */}
       {showQR && <QRModal roomCode={room.code} onClose={() => setShowQR(false)} />}
     </>
   );
 }
 
-/* ── Drop Menu Popover ── */
 function DropMenu({
   children,
   onClose,
@@ -512,11 +420,7 @@ function DropMenu({
   return (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div
-        className={`absolute top-full mt-2 z-20 min-w-[200px] drop-menu ${
-          align === "right" ? "right-0" : "left-0"
-        }`}
-      >
+      <div className={`absolute top-full mt-1.5 z-20 min-w-[180px] drop-menu ${align === "right" ? "right-0" : "left-0"}`}>
         {children}
       </div>
     </>

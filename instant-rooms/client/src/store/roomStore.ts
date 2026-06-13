@@ -30,8 +30,9 @@ interface RoomStore {
     uploaderName?: string;
     itemExpiryHours?: ItemExpiryOption;
     tags?: string[];
+    note?: string;
   }) => Promise<void>;
-  uploadFile: (file: File, uploaderName?: string, itemExpiryHours?: ItemExpiryOption, tags?: string[]) => Promise<void>;
+  uploadFile: (file: File, uploaderName?: string, itemExpiryHours?: ItemExpiryOption, tags?: string[], note?: string) => Promise<void>;
   deleteContent: (contentId: string) => Promise<void>;
   pinContent: (contentId: string, pinned: boolean) => Promise<void>;
   updateTags: (contentId: string, tags: string[]) => Promise<void>;
@@ -96,7 +97,8 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     if (!room) return;
     set({ isUploading: true });
     try {
-      const item = await contentApi.addText({ roomCode: room.code, ...params });
+      const { note, ...rest } = params;
+      const item = await contentApi.addText({ roomCode: room.code, ...rest, note });
       set((state) => ({
         contentItems: [...state.contentItems, item],
         isUploading: false,
@@ -108,12 +110,12 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     }
   },
 
-  uploadFile: async (file, uploaderName, itemExpiryHours, tags) => {
+  uploadFile: async (file, uploaderName, itemExpiryHours, tags, note) => {
     const room = get().room;
     if (!room) return;
     set({ isUploading: true });
     try {
-      const item = await contentApi.upload(file, room.code, uploaderName, itemExpiryHours, tags);
+      const item = await contentApi.upload(file, room.code, uploaderName, itemExpiryHours, tags, note);
       set((state) => ({
         contentItems: [...state.contentItems, item],
         isUploading: false,

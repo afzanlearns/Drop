@@ -37,6 +37,7 @@ const AddTextSchema = z.object({
   uploaderName: z.string().max(100).optional(),
   itemExpiryHours: z.union([z.literal(1), z.literal(6), z.literal(24)]).optional(),
   tags: z.array(z.string()).optional(),
+  note: z.string().max(1000).optional(),
 });
 
 const PinContentSchema = z.object({
@@ -65,7 +66,7 @@ router.post("/text", (req: Request, res: Response) => {
     return;
   }
 
-  const { roomCode, type, content, title, language, uploaderName, itemExpiryHours, tags } = parsed.data;
+  const { roomCode, type, content, title, language, uploaderName, itemExpiryHours, tags, note } = parsed.data;
 
   const room = roomService.getRoom(roomCode);
   if (!room) {
@@ -94,6 +95,7 @@ router.post("/text", (req: Request, res: Response) => {
     uploaderName,
     itemExpiresAt,
     tags,
+    note,
   });
 
   roomService.addContentId(roomCode, item.id);
@@ -136,9 +138,8 @@ router.post(
     }
 
     const uploaderName = req.body.uploaderName as string | undefined;
+    const note = req.body.note as string | undefined;
     const itemExpiryHours = req.body.itemExpiryHours
-      ? parseInt(req.body.itemExpiryHours, 10)
-      : undefined;
     const itemExpiresAt =
       itemExpiryHours && [1, 6, 24].includes(itemExpiryHours)
         ? new Date(Date.now() + itemExpiryHours * 60 * 60 * 1000).toISOString()
@@ -160,7 +161,8 @@ router.post(
       serverBaseUrl,
       uploaderName,
       itemExpiresAt,
-      parsedTags
+      parsedTags,
+      note
     );
     roomService.addContentId(roomCode, item.id);
 

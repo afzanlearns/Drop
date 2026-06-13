@@ -44,6 +44,7 @@ export interface ContentItem {
   content: string | null;
   fileId: string | null;
   fileUrl: string | null;
+  note: string | null;
   metadata: ContentMetadata;
   createdAt: string;
   version: number;

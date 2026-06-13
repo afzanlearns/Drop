@@ -75,6 +75,7 @@ export const contentService = {
       uploaderName?: string;
       itemExpiresAt?: string;
       tags?: string[];
+      note?: string;
     }
   ): ContentItem {
     const id = crypto.randomUUID();
@@ -94,6 +95,7 @@ export const contentService = {
       content: params.content,
       fileId: null,
       fileUrl: null,
+      note: params.note ?? null,
       metadata: params.language ? { language: params.language } : {},
       createdAt: now,
       version: 1,
@@ -115,7 +117,8 @@ export const contentService = {
     serverBaseUrl: string,
     uploaderName?: string,
     itemExpiresAt?: string,
-    tags?: string[]
+    tags?: string[],
+    note?: string
   ): ContentItem {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -135,6 +138,7 @@ export const contentService = {
       content: null,
       fileId: file.filename,
       fileUrl: `${serverBaseUrl}/uploads/${file.filename}`,
+      note: note ?? null,
       metadata: {
         size: file.size,
         mimeType: file.mimetype,

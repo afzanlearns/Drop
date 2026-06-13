@@ -100,6 +100,7 @@ export const contentApi = {
     uploaderName?: string;
     itemExpiryHours?: ItemExpiryOption;
     tags?: string[];
+    note?: string;
   }) => {
     const res = await api.post<{ item: ContentItem }>("/content/text", data);
     return res.data.item;
@@ -110,7 +111,8 @@ export const contentApi = {
     roomCode: string,
     uploaderName?: string,
     itemExpiryHours?: ItemExpiryOption,
-    tags?: string[]
+    tags?: string[],
+    note?: string
   ) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -118,6 +120,7 @@ export const contentApi = {
     if (uploaderName) formData.append("uploaderName", uploaderName);
     if (itemExpiryHours) formData.append("itemExpiryHours", String(itemExpiryHours));
     if (tags && tags.length > 0) formData.append("tags", JSON.stringify(tags));
+    if (note) formData.append("note", note);
     const res = await api.post<{ item: ContentItem }>("/content/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });

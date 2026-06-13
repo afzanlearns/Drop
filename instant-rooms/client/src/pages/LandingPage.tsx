@@ -1,11 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowRight, Hash, FileText, Code, Image, FilePdf, Lightning,
-  Lock, Clock, Shuffle, PencilSimple, CheckCircle, XCircle,
-  SpinnerGap, User, QrCode, Copy, PushPin, Warning, CaretDown, ArrowUp, ArrowUpRight,
-  Columns
-} from "@phosphor-icons/react";
 import { roomApi } from "../utils/api";
 import Navbar from "../components/layout/Navbar";
 
@@ -13,13 +7,13 @@ type CodeMode = "random" | "custom";
 type AvailStatus = "idle" | "checking" | "available" | "taken";
 
 const FEATURES = [
-  { icon: Lightning, label: "Instant Rooms", desc: "Create a shareable room in one click. Random or custom code — your choice." },
-  { icon: FileText, label: "Drop Anything", desc: "Images, PDFs, text snippets, code blocks. Any file up to 10MB." },
-  { icon: Lock, label: "No Login Required", desc: "Share a code. That's it. No accounts, no emails, no passwords." },
-  { icon: Lock, label: "Access Modes", desc: "Full access, read-only, or drop-only. You control who can do what." },
-  { icon: Clock, label: "Auto-Expiry", desc: "Rooms vanish after 24 hours. Data is permanently wiped on expiry." },
-  { icon: User, label: "Creator Controls", desc: "Only the creator can delete content or change room settings." },
-  { icon: Columns, label: "Board View", desc: "Organize content by type — images, PDFs, and code in separate visual columns." }
+  { label: "Instant Rooms", desc: "Create a shareable room in one click. Random or custom code — your choice." },
+  { label: "Drop Anything", desc: "Images, PDFs, text snippets, code blocks. Any file up to 10MB." },
+  { label: "No Login Required", desc: "Share a code. That's it. No accounts, no emails, no passwords." },
+  { label: "Access Modes", desc: "Full access, read-only, or drop-only. You control who can do what." },
+  { label: "Auto-Expiry", desc: "Rooms vanish after 24 hours. Data is permanently wiped on expiry." },
+  { label: "Creator Controls", desc: "Only the creator can delete content or change room settings." },
+  { label: "Board View", desc: "Organize content by type — images, PDFs, and code in separate visual columns." },
 ];
 
 const FAQS = [
@@ -27,196 +21,9 @@ const FAQS = [
   { q: "How long do rooms last?", a: "Rooms expire after 24 hours by default. Creators can pin a room to keep it alive indefinitely." },
   { q: "Is my data private?", a: "Rooms are only accessible via their unique code. We don't index or display rooms publicly. Content auto-deletes on expiry." },
   { q: "What file types are supported?", a: "Images, PDFs, plain text, and code snippets. Any file up to 10MB." },
-  { q: "What happens when a room expires?", a: "All content is permanently deleted. There is no recovery after expiry." }
+  { q: "What happens when a room expires?", a: "All content is permanently deleted. There is no recovery after expiry." },
 ];
 
-/* ── Room Mockup Preview ── */
-function RoomMockup() {
-  const items = [
-    { type: "code",  label: "index.ts",                 dot: "#6366F1" },
-    { type: "text",  label: "Meeting notes · 3 min ago", dot: "#16A34A" },
-    { type: "image", label: "screenshot.png · 5 min ago", dot: "#EA580C" },
-  ];
-
-  return (
-    <div className="relative w-full max-w-[340px] mx-auto hidden lg:flex flex-col mt-2">
-      <div className="absolute -inset-6 rounded-3xl pointer-events-none opacity-50"
-        style={{
-          background: "radial-gradient(ellipse at 60% 40%, rgba(0,113,227,0.06) 0%, transparent 70%)",
-        }}
-      />
-      <div className="relative flex flex-col text-[0.8rem] overflow-hidden rounded-[10px]"
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          boxShadow: "var(--shadow-lg)",
-        }}
-      >
-        <div className="flex items-center gap-2 px-4 py-2.5"
-          style={{ borderBottom: "1px solid var(--color-border)", background: "var(--color-surface)" }}
-        >
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-          </div>
-          <div className="flex-1 ml-2 px-2.5 py-1 text-[0.6rem] rounded-[4px] flex items-center justify-between font-mono"
-            style={{ background: "var(--color-surface-alt)", color: "var(--color-text-muted)" }}
-          >
-            <span>drop.app/room/XK7mN2pQ</span>
-            <Lock size={8} weight="bold" />
-          </div>
-        </div>
-
-        <div className="px-4 py-2 flex items-center justify-between"
-          style={{ borderBottom: "1px solid var(--color-border)" }}
-        >
-          <div className="flex items-center gap-1.5">
-            <Hash size={12} weight="bold" style={{ color: "var(--color-text-primary)" }} />
-            <span className="font-mono text-[0.65rem] font-bold" style={{ color: "var(--color-text-primary)" }}>
-              XK7mN2pQ
-            </span>
-          </div>
-          <div className="flex gap-1.5 font-mono">
-            <span className="text-[8px] px-1.5 py-0.5 rounded-[3px] font-bold"
-              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-            >
-              Full Access
-            </span>
-            <span className="text-[8px] px-1.5 py-0.5 rounded-[3px] font-bold"
-              style={{ background: "var(--color-surface-alt)", color: "var(--color-text-secondary)" }}
-            >
-              23H LEFT
-            </span>
-          </div>
-        </div>
-
-        <div style={{ background: "var(--color-bg)" }}>
-          {items.map((item, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-2"
-              style={{ borderBottom: "1px solid var(--color-border-soft)" }}
-            >
-              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: item.dot }} />
-              <span className="text-[0.6rem] font-bold px-1 py-0.5 rounded-[3px]"
-                style={{ background: "var(--color-surface-alt)", color: "var(--color-text-secondary)" }}
-              >
-                {item.type.toUpperCase()}
-              </span>
-              <span className="text-[0.65rem] font-mono truncate" style={{ color: "var(--color-text-primary)" }}>
-                {item.label}
-              </span>
-            </div>
-          ))}
-          <div className="mx-3 my-3 px-4 py-4 flex flex-col items-center justify-center gap-1.5 rounded-[8px] border border-dashed"
-            style={{ borderColor: "var(--color-border-strong)", background: "var(--color-surface-alt)" }}
-          >
-            <PushPin size={14} style={{ color: "var(--color-text-muted)" }} />
-            <span className="text-[0.55rem] font-bold uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
-              Drop files or paste content
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Walkthrough Timeline ── */
-function StaticWalkthrough() {
-  const steps = [
-    { num: "01", text: "Room created: XK7mN2pQ",          status: "done" },
-    { num: "02", text: "File dropped: 'design-assets.zip'", status: "done" },
-    { num: "03", text: "Link shared with team",             status: "done" },
-    { num: "04", text: "Room expired. Data wiped.",          status: "expired" },
-  ];
-
-  return (
-    <div className="rounded-[10px] overflow-hidden"
-      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-    >
-      <div className="flex items-center justify-between px-4 py-2.5"
-        style={{ borderBottom: "1px solid var(--color-border)", background: "var(--color-surface)" }}
-      >
-        <div className="flex gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-red-400" />
-          <div className="w-2 h-2 rounded-full bg-amber-400" />
-          <div className="w-2 h-2 rounded-full bg-green-400" />
-        </div>
-        <span className="font-mono text-[0.65rem]" style={{ color: "var(--color-text-muted)" }}>
-          instant-rooms — activity
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-0 p-5">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center gap-4 opacity-0"
-            style={{ animation: `fadeInUp 0.3s ease forwards`, animationDelay: `${i * 120}ms` }}
-          >
-            <div className="flex flex-col items-center">
-              <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.55rem] font-bold flex-shrink-0"
-                style={{
-                  background: step.status === "expired" ? "rgba(220,38,38,0.08)" : "var(--color-brand-soft)",
-                  color: step.status === "expired" ? "var(--color-accent-red)" : "var(--color-brand)",
-                }}
-              >
-                {step.num}
-              </div>
-              {i < steps.length - 1 && (
-                <div className="w-px flex-1 mt-0.5 mb-0.5" style={{ background: "var(--color-border)", height: "18px" }} />
-              )}
-            </div>
-            <span className="text-[0.78rem] font-mono leading-[1.4] pb-3"
-              style={{
-                color: step.status === "expired" ? "var(--color-text-muted)" : "var(--color-text-primary)",
-                textDecoration: step.status === "expired" ? "line-through" : "none",
-              }}
-            >
-              {step.text}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Feature Card ── */
-function FeatureCard({ icon: Icon, label, desc }: { icon: React.ElementType; label: string; desc: string }) {
-  return (
-    <div className="flex flex-col gap-3 p-4 rounded-[8px] transition-all duration-150"
-      style={{
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "var(--color-border-strong)";
-        el.style.boxShadow = "var(--shadow-sm)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "var(--color-border)";
-        el.style.boxShadow = "none";
-      }}
-    >
-      <div className="w-9 h-9 rounded-[6px] flex items-center justify-center flex-shrink-0"
-        style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-      >
-        <Icon size={18} weight="bold" />
-      </div>
-      <div>
-        <h3 className="text-[0.9rem] font-bold mb-0.5" style={{ color: "var(--color-text-primary)" }}>
-          {label}
-        </h3>
-        <p className="text-[0.8rem] leading-[1.6]" style={{ color: "var(--color-text-secondary)" }}>
-          {desc}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ── Landing Page ── */
 export default function LandingPage() {
   const navigate = useNavigate();
   const [roomCode, setRoomCode] = useState("");
@@ -230,14 +37,7 @@ export default function LandingPage() {
   const [availStatus, setAvailStatus] = useState<AvailStatus>("idle");
   const [availMsg, setAvailMsg] = useState("");
   const [customCodeError, setCustomCodeError] = useState("");
-  const [showBackToTop, setShowBackToTop] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => setShowBackToTop(window.scrollY > 400);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const validateCode = (code: string): string => {
     if (!code) return "Please enter a code.";
@@ -255,17 +55,9 @@ export default function LandingPage() {
     setAvailStatus("checking");
     try {
       const exists = await roomApi.checkCode(normalized);
-      if (exists) {
-        setAvailStatus("taken");
-        setAvailMsg(`"${normalized}" is already taken.`);
-      } else {
-        setAvailStatus("available");
-        setAvailMsg(`"${normalized}" is available!`);
-      }
-    } catch {
-      setAvailStatus("idle");
-      setAvailMsg("Could not check. Please try again.");
-    }
+      if (exists) { setAvailStatus("taken"); setAvailMsg(`"${normalized}" is already taken.`); }
+      else { setAvailStatus("available"); setAvailMsg(`"${normalized}" is available!`); }
+    } catch { setAvailStatus("idle"); setAvailMsg("Could not check. Please try again."); }
   };
 
   const handleCreate = async () => {
@@ -286,10 +78,9 @@ export default function LandingPage() {
       localStorage.setItem(`creator_${room.code.toUpperCase()}`, creatorToken);
       navigate(`/room/${room.code}`);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
-          : undefined;
+      const msg = err && typeof err === "object" && "response" in err
+        ? (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined;
       setError(msg ?? "Could not create room. Please try again.");
       setIsCreating(false);
     }
@@ -304,346 +95,223 @@ export default function LandingPage() {
 
   const handleCustomCodeChange = (val: string) => {
     setCustomCode(val.toUpperCase().replace(/[^A-Za-z0-9]/g, ""));
-    setAvailStatus("idle");
-    setAvailMsg("");
-    setCustomCodeError("");
+    setAvailStatus("idle"); setAvailMsg(""); setCustomCodeError("");
   };
 
   return (
-    <div className="min-h-[100dvh] overflow-x-hidden"
-      style={{ background: "var(--color-bg)", color: "var(--color-text-primary)" }}
-    >
+    <div style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Navbar />
 
-      {/* ── Hero ── */}
-      <section className="relative min-h-[70vh] flex items-center px-6 md:px-12 pt-24 md:pt-28 pb-16"
-        style={{ background: "var(--color-bg)" }}
+      {/* Hero */}
+      <section className="lg:min-h-screen flex items-center px-6 md:px-12 pt-12 lg:pt-14 pb-16 lg:pb-0"
+        style={{ borderBottom: '1px solid var(--border-subtle)' }}
       >
-        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <div className="absolute top-[-8%] left-[30%] w-[600px] h-[500px] rounded-full"
-            style={{ background: "radial-gradient(ellipse, rgba(0,113,227,0.04) 0%, transparent 70%)" }}
-          />
-        </div>
-
-        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-center relative z-10">
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-center">
           <div className="max-w-[520px]">
-            <div className="inline-flex items-center gap-2 text-[0.7rem] font-semibold rounded-full px-3 py-1 mb-6"
-              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)", border: "1px solid var(--color-border)" }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-brand)" }} />
-              v2.0 — Board view & custom codes
-              <ArrowRight size={11} weight="bold" />
-            </div>
-
-            <h1 className="text-[clamp(2rem,4.5vw,3.75rem)] font-black tracking-tight leading-[1.05] mb-5">
-              <span style={{ color: "var(--color-text-primary)" }}>Drop anything. </span>
-              <span style={{ color: "var(--color-text-muted)" }}>Share instantly.</span>
+            <h1 className="font-mono font-semibold leading-[1.05] mb-5" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', color: 'var(--text-primary)' }}>
+              Drop anything.
+              <br /><span style={{ color: 'var(--text-secondary)' }}>Share instantly.</span>
             </h1>
-
-            <p className="text-[0.9rem] leading-[1.7] mb-8 max-w-[420px]" style={{ color: "var(--color-text-secondary)" }}>
-              Create a room in one click. Paste text, drop images, share PDFs.
-              No logins, no friction — just pure utility.
+            <p className="text-body mb-8 max-w-[420px]" style={{ color: 'var(--text-secondary)' }}>
+              Create a room in one click. Paste text, drop images, share PDFs. No logins, no friction — just pure utility.
             </p>
 
-            <div className="rounded-[10px] p-5 max-w-[440px]"
-              style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-            >
+            <div className="p-6" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', maxWidth: 440 }}>
               <div className="mb-3">
-                <input
-                  value={roomName}
-                  onChange={(e) => { setRoomName(e.target.value); setError(null); }}
-                  placeholder="Room name (optional)"
-                  maxLength={100}
-                  className="input-field"
-                />
+                <input value={roomName} onChange={(e) => { setRoomName(e.target.value); setError(null); }}
+                  placeholder="Room name (optional)" maxLength={100} className="input-field" />
               </div>
 
               <div className="segment-control w-full mb-3">
-                <button
-                  onClick={() => { setCodeMode("random"); setAvailStatus("idle"); setAvailMsg(""); setCustomCodeError(""); }}
-                  className={`segment-btn flex-1 justify-center ${codeMode === "random" ? "active" : ""}`}
-                >
-                  <Shuffle size={13} weight="bold" />
-                  Random
-                </button>
-                <button
-                  onClick={() => setCodeMode("custom")}
-                  className={`segment-btn flex-1 justify-center ${codeMode === "custom" ? "active" : ""}`}
-                >
-                  <PencilSimple size={13} weight="bold" />
-                  Custom
-                </button>
+                <button onClick={() => { setCodeMode("random"); setAvailStatus("idle"); setAvailMsg(""); setCustomCodeError(""); }}
+                  className={`segment-btn flex-1 ${codeMode === "random" ? "active" : ""}`}>Random</button>
+                <button onClick={() => setCodeMode("custom")}
+                  className={`segment-btn flex-1 ${codeMode === "custom" ? "active" : ""}`}>Custom</button>
               </div>
 
               {codeMode === "custom" && (
                 <div className="mb-3">
                   <div className="flex gap-2">
                     <div className="flex-1 relative">
-                      <input
-                        value={customCode}
-                        onChange={(e) => { handleCustomCodeChange(e.target.value); setError(null); }}
-                        placeholder="e.g. PROJECT_X"
-                        maxLength={12}
-                        className="input-field uppercase font-mono font-bold"
-                      />
-                      {availStatus === "available" && (
-                        <CheckCircle size={15} className="absolute right-3 top-1/2 -translate-y-1/2"
-                          style={{ color: "var(--color-accent-green)" }} weight="fill"
-                        />
-                      )}
-                      {availStatus === "taken" && (
-                        <XCircle size={15} className="absolute right-3 top-1/2 -translate-y-1/2"
-                          style={{ color: "var(--color-accent-red)" }} weight="fill"
-                        />
-                      )}
+                      <input value={customCode} onChange={(e) => { handleCustomCodeChange(e.target.value); setError(null); }}
+                        placeholder="e.g. PROJECT_X" maxLength={12} className="input-field uppercase font-mono font-medium" />
+                      {availStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs" style={{ color: 'var(--success)' }}>✓</span>}
+                      {availStatus === "taken" && <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs" style={{ color: 'var(--error)' }}>✗</span>}
                     </div>
-                    <button
-                      onClick={handleCheckAvailability}
-                      disabled={availStatus === "checking" || !customCode}
-                      className="btn-secondary px-3 py-2 text-[0.8rem]"
-                    >
+                    <button onClick={handleCheckAvailability} disabled={availStatus === "checking" || !customCode} className="btn-secondary">
                       {availStatus === "checking" ? "..." : "Check"}
                     </button>
                   </div>
-                  {customCodeError && (
-                    <p className="mt-1.5 text-xs" style={{ color: "var(--color-accent-red)" }}>{customCodeError}</p>
-                  )}
+                  {customCodeError && <p className="mt-1.5 font-mono text-xs" style={{ color: 'var(--error)' }}>{customCodeError}</p>}
                   {availMsg && !customCodeError && (
-                    <p className="mt-1.5 text-xs font-semibold"
-                      style={{ color: availStatus === "available" ? "var(--color-accent-green)" : "var(--color-accent-red)" }}
-                    >
-                      {availMsg}
-                    </p>
+                    <p className="mt-1.5 font-mono text-xs" style={{ color: availStatus === "available" ? 'var(--success)' : 'var(--error)' }}>{availMsg}</p>
                   )}
                 </div>
               )}
 
-              <button
-                id="create-room-btn"
-                onClick={handleCreate}
+              <button id="create-room-btn" onClick={handleCreate}
                 disabled={isCreating || (codeMode === "custom" && availStatus === "taken")}
-                className="btn-primary w-full justify-center py-2.5 text-[0.875rem]"
-              >
-                {isCreating ? (
-                  <><SpinnerGap size={15} className="animate-spin" /> Creating...</>
-                ) : (
-                  <>Create Room <ArrowRight size={15} weight="bold" /></>
-                )}
-              </button>
+                className="btn-primary w-full">{isCreating ? "Creating..." : "Create Room"}</button>
 
-              {error && (
-                <p className="mt-2 text-[0.8rem] text-center font-medium" style={{ color: "var(--color-accent-red)" }}>
-                  {error}
-                </p>
-              )}
+              {error && <p className="mt-2 font-mono text-xs text-center" style={{ color: 'var(--error)' }}>{error}</p>}
 
-              <div className="mt-4 pt-4 flex flex-col gap-3" style={{ borderTop: "1px solid var(--color-border)" }}>
-                <span className="text-[0.7rem] font-semibold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
-                  Already have a code?
-                </span>
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <p className="font-mono text-label uppercase mb-3" style={{ color: 'var(--text-muted)' }}>Already have a code?</p>
                 <form onSubmit={handleJoin} className="flex gap-2">
-                  <input
-                    ref={inputRef}
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(e.target.value)}
-                    placeholder="Enter code"
-                    className="input-field flex-1 uppercase font-mono"
-                  />
-                  <button type="submit" className="btn-secondary px-3 py-2 text-[0.8rem] font-semibold">
-                    Join
-                  </button>
+                  <input ref={inputRef} value={roomCode} onChange={(e) => setRoomCode(e.target.value)}
+                    placeholder="Enter code" className="input-field flex-1 uppercase" />
+                  <button type="submit" className="btn-secondary">Join</button>
                 </form>
               </div>
             </div>
           </div>
 
-          <RoomMockup />
+          <div className="hidden lg:flex flex-col">
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <span className="font-mono text-data" style={{ color: 'var(--text-secondary)' }}>drop.app/room/XK7mN2pQ</span>
+                <span className="font-mono text-label" style={{ color: 'var(--accent)' }}>FULL ACCESS</span>
+              </div>
+              {[
+                { tag: "CODE", color: 'var(--accent)', text: "index.ts" },
+                { tag: "TEXT", color: 'var(--success)', text: "Meeting notes · 3 min ago" },
+                { tag: "IMAGE", color: 'var(--warning)', text: "screenshot.png · 5 min ago" },
+              ].map(({ tag, color, text }) => (
+                <div key={tag} className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <span className="font-mono text-label" style={{ color }}>{tag}</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{text}</span>
+                </div>
+              ))}
+              <div className="mx-3 my-3 px-4 py-6 flex items-center justify-center" style={{ border: '1px dashed var(--border-default)', background: 'var(--bg-elevated)' }}>
+                <span className="font-mono text-label" style={{ color: 'var(--text-muted)' }}>Drop files or paste content</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── About ── */}
-      <section id="about" className="px-6 md:px-12 py-16 md:py-24"
-        style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-surface)" }}
+      {/* About */}
+      <section id="about" className="lg:min-h-screen flex items-center px-6 md:px-12 py-16 lg:py-0"
+        style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}
       >
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-center">
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-[0.7rem] font-semibold rounded-full px-3 py-1 mb-5"
-              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-            >
-              <Hash size={11} weight="bold" /> About
-            </div>
-
-            <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-black tracking-tight leading-[1.1] mb-4">
+            <p className="font-mono text-label uppercase mb-4" style={{ color: 'var(--accent)' }}>About</p>
+            <h2 className="font-mono font-semibold leading-[1.1] mb-4" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
               Built for speed.<br />Designed for simplicity.
             </h2>
-
-            <p className="text-[0.9rem] leading-[1.7] mb-8 max-w-lg" style={{ color: "var(--color-text-secondary)" }}>
-              We built Drop because sharing a quick script or a few images between devices
-              shouldn't require accounts or setups. Create, drop, share, and disappear.
-              Everything vanishes when you're done.
+            <p className="text-body mb-8 max-w-lg" style={{ color: 'var(--text-secondary)' }}>
+              We built Drop because sharing a quick script or a few images between devices shouldn't require accounts or setups. Create, drop, share, and disappear. Everything vanishes when you're done.
             </p>
-
-            <div className="grid grid-cols-3 rounded-[8px] overflow-hidden"
-              style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
-            >
+            <div className="grid grid-cols-3" style={{ border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               {[
-                { icon: Lightning, label: "Instant",    desc: "Ready in one click. No waiting." },
-                { icon: Lock,      label: "Private",     desc: "No accounts. 100% anonymous." },
-                { icon: Clock,     label: "Ephemeral",   desc: "Auto-expiry leaves no trace." },
-              ].map(({ icon: Icon, label, desc }, i) => (
-                <div key={i} className="p-4"
-                  style={{ borderRight: i < 2 ? "1px solid var(--color-border)" : "none" }}
-                >
-                  <div className="w-7 h-7 rounded-[5px] flex items-center justify-center mb-2"
-                    style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-                  >
-                    <Icon size={14} weight="bold" />
-                  </div>
-                  <h3 className="text-[0.8rem] font-bold mb-0.5" style={{ color: "var(--color-text-primary)" }}>
-                    {label}
-                  </h3>
-                  <p className="text-[0.72rem] leading-[1.5]" style={{ color: "var(--color-text-secondary)" }}>
-                    {desc}
-                  </p>
+                { label: "Instant", desc: "Ready in one click. No waiting." },
+                { label: "Private", desc: "No accounts. 100% anonymous." },
+                { label: "Ephemeral", desc: "Auto-expiry leaves no trace." },
+              ].map(({ label, desc }, i) => (
+                <div key={label} className="p-4" style={i < 2 ? { borderRight: '1px solid var(--border-subtle)' } : {}}>
+                  <p className="font-mono text-label uppercase mb-1" style={{ color: 'var(--text-primary)' }}>{label}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <StaticWalkthrough />
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+            <div className="px-4 py-2" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
+              <span className="font-mono text-data" style={{ color: 'var(--text-muted)' }}>instant-rooms — activity</span>
+            </div>
+            <div className="p-5">
+              {[
+                { num: "01", text: "Room created: XK7mN2pQ", expired: false },
+                { num: "02", text: "File dropped: 'design-assets.zip'", expired: false },
+                { num: "03", text: "Link shared with team", expired: false },
+                { num: "04", text: "Room expired. Data wiped.", expired: true },
+              ].map((step, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3" style={i < 3 ? { borderBottom: '1px solid var(--border-subtle)', marginBottom: '0.75rem' } : {}}>
+                  <span className="font-mono text-label flex-shrink-0" style={{ color: step.expired ? 'var(--error)' : 'var(--accent)', width: 24 }}>
+                    {step.num}
+                  </span>
+                  <span className="font-mono text-xs leading-[1.4]" style={{
+                    color: step.expired ? 'var(--text-muted)' : 'var(--text-primary)',
+                    textDecoration: step.expired ? 'line-through' : 'none',
+                  }}>
+                    {step.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section id="features" className="px-6 md:px-12 py-16 md:py-24"
-        style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-bg)" }}
+      {/* Features */}
+      <section id="features" className="lg:min-h-screen flex items-center px-6 md:px-12 py-16 lg:py-0"
+        style={{ borderTop: '1px solid var(--border-subtle)' }}
       >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 text-[0.7rem] font-semibold rounded-full px-3 py-1 mb-4"
-              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-            >
-              <Hash size={11} weight="bold" /> Features
-            </div>
-            <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-black tracking-tight leading-[1.1] mb-2">
-              Everything you need.
-            </h2>
-            <p className="text-[0.9rem] max-w-md mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-              Fast, efficient, and beautifully minimal.
-            </p>
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="text-center mb-10">
+            <p className="font-mono text-label uppercase mb-4" style={{ color: 'var(--accent)' }}>Features</p>
+            <h2 className="font-mono font-semibold leading-[1.1] mb-2" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>Everything you need.</h2>
+            <p className="text-body max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>Fast, efficient, and beautifully minimal.</p>
           </div>
-
-          <div className="rounded-[10px] p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start mb-5"
-            style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-          >
+          <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start mb-5" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
             <div className="flex-1">
-              <div className="w-10 h-10 rounded-[6px] flex items-center justify-center mb-4"
-                style={{ background: "var(--color-brand)", boxShadow: "var(--shadow-brand)" }}
-              >
-                <Lightning size={18} className="text-white" weight="bold" />
-              </div>
-              <h3 className="text-[1.2rem] font-black tracking-tight mb-2" style={{ color: "var(--color-text-primary)" }}>
-                Instant Rooms
-              </h3>
-              <p className="text-[0.875rem] leading-[1.7] max-w-md mb-5" style={{ color: "var(--color-text-secondary)" }}>
-                Create a shareable room in one click. Random or custom code — your choice.
-                No friction, just pure utility when you need to move data fast.
+              <p className="font-mono text-label uppercase mb-3" style={{ color: 'var(--accent)' }}>Instant Rooms</p>
+              <h3 className="font-mono font-medium mb-2" style={{ fontSize: '1.25rem' }}>Instant Rooms</h3>
+              <p className="text-body max-w-md mb-5" style={{ color: 'var(--text-secondary)' }}>
+                Create a shareable room in one click. Random or custom code — your choice. No friction, just pure utility when you need to move data fast.
               </p>
-              <button
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                  setTimeout(() => document.getElementById("create-room-btn")?.focus(), 500);
-                }}
-                className="btn-primary"
-              >
-                Create Room Now <ArrowRight size={15} weight="bold" />
-              </button>
+              <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(() => document.getElementById("create-room-btn")?.focus(), 500); }}
+                className="btn-primary">Create Room Now</button>
             </div>
-
-            <div className="flex-1 w-full hidden sm:block rounded-[8px] overflow-hidden"
-              style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
-            >
-              <div className="px-4 py-2 flex items-center gap-2"
-                style={{ borderBottom: "1px solid var(--color-border)" }}
-              >
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-red-400" />
-                  <div className="w-2 h-2 rounded-full bg-amber-400" />
-                  <div className="w-2 h-2 rounded-full bg-green-400" />
-                </div>
-                <span className="text-[0.65rem] font-mono" style={{ color: "var(--color-text-muted)" }}>
-                  room.ts
-                </span>
-              </div>
-              <div className="p-4 font-mono text-[0.72rem] leading-[2]" style={{ color: "var(--color-text-primary)" }}>
-                <div style={{ color: "var(--color-text-muted)" }}>// Create a room</div>
-                <div><span style={{ color: "#818CF8" }}>const</span> room = <span style={{ color: "#818CF8" }}>await</span></div>
-                <div className="pl-4">
-                  <span style={{ color: "var(--color-brand)" }}>createRoom</span>
-                  {"({"})
-                </div>
-                <div className="pl-8">code: <span style={{ color: "#FB923C" }}>'MY-ROOM'</span>,</div>
-                <div className="pl-8">access: <span style={{ color: "#FB923C" }}>'full'</span></div>
+            <div className="flex-1 w-full hidden sm:block p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <div className="font-mono text-xs leading-[2]" style={{ color: 'var(--text-primary)' }}>
+                <div style={{ color: 'var(--text-muted)' }}>// Create a room</div>
+                <div><span style={{ color: '#A78BFA' }}>const</span> room = <span style={{ color: '#A78BFA' }}>await</span></div>
+                <div className="pl-4"><span style={{ color: 'var(--accent)' }}>createRoom</span>{"({"}</div>
+                <div className="pl-8">code: <span style={{ color: '#FB923C' }}>'MY-ROOM'</span>,</div>
+                <div className="pl-8">access: <span style={{ color: '#FB923C' }}>'full'</span></div>
                 <div className="pl-4">{"});"}</div>
-                <div className="mt-1" style={{ color: "var(--color-text-muted)" }}>// Share the link</div>
-                <div><span style={{ color: "var(--color-brand)" }}>share</span>(room.url);</div>
+                <div className="mt-1" style={{ color: 'var(--text-muted)' }}>// Share the link</div>
+                <div><span style={{ color: 'var(--accent)' }}>share</span>(room.url);</div>
               </div>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {FEATURES.slice(1).map((feature, i) => (
-              <FeatureCard key={i} {...feature} />
+              <div key={i} className="p-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+                <p className="font-mono text-label uppercase mb-1" style={{ color: 'var(--accent)' }}>{feature.label}</p>
+                <p className="text-body" style={{ color: 'var(--text-secondary)' }}>{feature.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section id="faq" className="px-6 md:px-12 py-16 md:py-24"
-        style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-surface)" }}
+      {/* FAQ */}
+      <section id="faq" className="lg:min-h-screen flex items-center px-6 md:px-12 py-16 lg:py-0"
+        style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}
       >
-        <div className="max-w-[660px] mx-auto">
+        <div className="max-w-[660px] mx-auto w-full">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 text-[0.7rem] font-semibold rounded-full px-3 py-1 mb-4"
-              style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
-            >
-              <Hash size={11} weight="bold" /> FAQ
-            </div>
-            <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-black tracking-tight leading-[1.1]">
-              Common questions.
-            </h2>
+            <p className="font-mono text-label uppercase mb-4" style={{ color: 'var(--accent)' }}>FAQ</p>
+            <h2 className="font-mono font-semibold leading-[1.1]" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>Common questions.</h2>
           </div>
-
           <div className="flex flex-col gap-2">
             {FAQS.map((faq, i) => {
               const isOpen = openFaqIndex === i;
               return (
-                <div key={i} className="rounded-[8px] transition-all duration-200"
-                  style={{
-                    background: "var(--color-bg)",
-                    border: `1px solid ${isOpen ? "var(--color-brand)" : "var(--color-border)"}`,
-                  }}
-                >
-                  <button
-                    onClick={() => setOpenFaqIndex(isOpen ? null : i)}
-                    className="w-full px-4 py-3.5 flex items-center justify-between text-left transition-colors duration-150"
-                    style={{ background: isOpen ? "var(--color-brand-soft)" : "transparent" }}
+                <div key={i} style={{ background: 'var(--bg-base)', border: '1px solid ' + (isOpen ? 'var(--accent)' : 'var(--border-subtle)') }}>
+                  <button onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                    className="w-full px-4 py-3 flex items-center justify-between text-left"
+                    style={{ background: isOpen ? 'var(--accent-dim)' : 'transparent' }}
                   >
-                    <span className="font-semibold text-[0.875rem] pr-4"
-                      style={{ color: isOpen ? "var(--color-brand)" : "var(--color-text-primary)" }}
-                    >
-                      {faq.q}
-                    </span>
-                    <CaretDown size={14} weight="bold"
-                      className={`flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                      style={{ color: isOpen ? "var(--color-brand)" : "var(--color-text-muted)" }}
-                    />
+                    <span className="font-mono text-sm pr-4" style={{ color: isOpen ? 'var(--accent)' : 'var(--text-primary)' }}>{faq.q}</span>
+                    <span className="font-mono text-label flex-shrink-0" style={{ color: isOpen ? 'var(--accent)' : 'var(--text-muted)' }}>{isOpen ? '−' : '+'}</span>
                   </button>
                   <div className={`faq-answer ${isOpen ? "open" : ""}`}>
-                    <div className="px-4 pb-4 text-[0.85rem] leading-[1.7]" style={{ color: "var(--color-text-secondary)" }}>
-                      {faq.a}
-                    </div>
+                    <div className="px-4 pb-4 text-body" style={{ color: 'var(--text-secondary)' }}>{faq.a}</div>
                   </div>
                 </div>
               );
@@ -652,86 +320,59 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="relative overflow-hidden"
-        style={{ background: "var(--color-surface-alt)", borderTop: "1px solid var(--color-border)" }}
-      >
-        <div className="absolute inset-0 flex justify-center items-end pointer-events-none select-none z-0 mix-blend-overlay">
-          <span className="font-black text-[28vw] md:text-[22vw] leading-[0.7] tracking-tighter"
-            style={{ color: "var(--color-text-primary)", opacity: "0.03", transform: "translateY(12%)" }}
-          >
-            DROP
-          </span>
-        </div>
-
-        <div className="relative z-10 py-12 px-6 md:px-12">
-          <div className="max-w-6xl mx-auto flex flex-col items-center gap-5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-[5px] flex items-center justify-center"
-                style={{ background: "var(--color-brand)", boxShadow: "var(--shadow-brand)" }}
-              >
-                <Hash size={15} className="text-white" weight="bold" />
-              </div>
-              <span className="font-bold text-[1.1rem] tracking-tight" style={{ color: "var(--color-text-primary)" }}>
-                Drop
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-5">
-              {["about", "features", "faq"].map((id) => (
-                <button key={id}
-                  onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
-                  className="text-[0.8rem] font-medium transition-colors duration-150"
-                  style={{ color: "var(--color-text-secondary)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)")}
-                >
-                  {id.charAt(0).toUpperCase() + id.slice(1)}
-                </button>
-              ))}
-              <a href="https://github.com/afzanlearns/Drop" target="_blank" rel="noreferrer"
-                className="flex items-center gap-1 text-[0.8rem] font-medium transition-colors duration-150"
-                style={{ color: "var(--color-text-secondary)" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)")}
-              >
-                GitHub <ArrowUpRight size={12} />
-              </a>
-            </div>
-
-            <button
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                setTimeout(() => document.getElementById("create-room-btn")?.focus(), 500);
+      {/* Footer */}
+      <footer style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+        <div className="relative flex items-center justify-center py-24 md:py-32">
+          {/* Glow behind */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <div className="w-[600px] h-[300px]" style={{
+              background: 'radial-gradient(ellipse at center, var(--accent-dim) 0%, transparent 70%)',
+              opacity: 0.6,
+            }} />
+          </div>
+          {/* Big DROP text */}
+          <div className="relative z-10 text-center">
+            <span className="font-mono font-black leading-none select-none"
+              style={{
+                fontSize: 'clamp(5rem, 20vw, 14rem)',
+                color: 'transparent',
+                background: 'linear-gradient(180deg, var(--text-primary) 20%, var(--text-muted) 60%, transparent 90%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                letterSpacing: '-0.04em',
               }}
-              className="btn-primary px-5 py-2"
             >
-              Create a Room <ArrowRight size={15} weight="bold" />
-            </button>
-
-            <p className="text-[0.7rem] font-medium" style={{ color: "var(--color-text-muted)" }}>
-              &copy; {new Date().getFullYear()} Drop. Share with intention.
-            </p>
+              DROP
+            </span>
+          </div>
+          {/* Footer links */}
+          <div className="absolute bottom-8 left-0 right-0 px-6 md:px-12">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="font-mono text-data" style={{ color: 'var(--text-muted)' }}>
+                &copy; {new Date().getFullYear()} Drop. Share with intention.
+              </p>
+              <div className="flex items-center gap-5">
+                {["about", "features", "faq"].map((id) => (
+                  <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
+                    className="font-mono text-label uppercase" style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+                  >
+                    {id}
+                  </button>
+                ))}
+                <a href="https://github.com/afzanlearns/Drop" target="_blank" rel="noreferrer"
+                  className="font-mono text-label uppercase" style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+                >
+                  GitHub
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
-
-      {showBackToTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 z-50 w-10 h-10 rounded-[5px] flex items-center justify-center transition-all duration-150"
-          style={{ background: "var(--color-brand)", boxShadow: "var(--shadow-brand)", color: "#fff" }}
-          aria-label="Back to top"
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-brand-hover)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-brand)";
-          }}
-        >
-          <ArrowUp size={18} weight="bold" />
-        </button>
-      )}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Trash, FileText, Code, Image, FilePdf, File, PushPin, PushPinSlash, Icon, Tag, Plus, X } from "@phosphor-icons/react";
 import type { ContentItem } from "../../../../shared/types";
 import { ContentType } from "../../../../shared/types";
 import { useRoomStore } from "../../store/roomStore";
@@ -17,26 +16,31 @@ interface Props {
   item: ContentItem;
 }
 
-const TYPE_CONFIG: Record<ContentType, { icon: Icon; label: string; bg: string; color: string }> = {
-  [ContentType.TEXT]:      { icon: FileText, label: "Text",  bg: "var(--color-surface-alt)",          color: "var(--color-text-secondary)" },
-  [ContentType.CODE]:      { icon: Code,     label: "Code",  bg: "rgba(0,113,227,0.08)",               color: "var(--color-accent-blue)"    },
-  [ContentType.IMAGE]:     { icon: Image,    label: "Image", bg: "rgba(217,119,6,0.08)",               color: "var(--color-accent-amber)"   },
-  [ContentType.PDF]:       { icon: FilePdf,  label: "PDF",   bg: "rgba(220,38,38,0.08)",               color: "var(--color-accent-red)"     },
-  [ContentType.FILE_BLOB]: { icon: File,     label: "File",  bg: "var(--color-brand-soft)",            color: "var(--color-brand)"          },
+function TextTypeIcon() { return <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="1.5" rx="0.3" fill="currentColor"/><rect x="1" y="4" width="6" height="1" rx="0.3" fill="currentColor"/><rect x="1" y="6.5" width="7" height="1" rx="0.3" fill="currentColor"/></svg>; }
+function CodeTypeIcon() { return <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 2.5L1 5L3 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 2.5L9 5L7 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 1.5L4.5 8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>; }
+function ImageTypeIcon() { return <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1.5" width="8" height="7" rx="0.5" stroke="currentColor" strokeWidth="0.8"/><circle cx="3" cy="4" r="1" fill="currentColor"/><path d="M1 7.5L3.5 5L6 7.5L7.5 6L9 7.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
+function PdfTypeIcon() { return <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="1" width="6" height="8" rx="0.5" stroke="currentColor" strokeWidth="0.8"/><path d="M3 3.5H7M3 5.5H6M3 7.5H7" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>; }
+function FileTypeIcon() { return <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 1H6L8 3V8.5C8 9.0523 7.55228 9.5 7 9.5H2.5C1.94772 9.5 1.5 9.05228 1.5 8.5V2C1.5 1.44772 1.94772 1 2.5 1Z" stroke="currentColor" strokeWidth="0.8"/><path d="M5.5 1V3.5H8" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round"/></svg>; }
+
+const TYPE_CONFIG: Record<ContentType, { label: string; color: string; icon: () => JSX.Element }> = {
+  [ContentType.TEXT]:      { label: "Text",  color: "var(--text-secondary)", icon: TextTypeIcon },
+  [ContentType.CODE]:      { label: "Code",  color: "var(--info)",           icon: CodeTypeIcon },
+  [ContentType.IMAGE]:     { label: "Image", color: "var(--warning)",        icon: ImageTypeIcon },
+  [ContentType.PDF]:       { label: "PDF",   color: "var(--error)",          icon: PdfTypeIcon },
+  [ContentType.FILE_BLOB]: { label: "File",  color: "var(--text-secondary)", icon: FileTypeIcon },
 };
 
 export default function ContentItemCard({ item }: Props) {
   const { deleteContent, pinContent, updateTags, room, viewMode } = useRoomStore();
   const { isCreator } = useCreator(room?.code);
-  const [guestName]     = useGuestName();
+  const [guestName] = useGuestName();
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isAddingTag,   setIsAddingTag]   = useState(false);
-  const [newTag,        setNewTag]        = useState("");
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState("");
 
   const isCompact = viewMode === "compact" || viewMode === "board";
-  const config    = TYPE_CONFIG[item.type];
-  const Icon      = config.icon;
-  const timeAgo   = formatDistanceToNow(new Date(item.createdAt), { addSuffix: true });
+  const config = TYPE_CONFIG[item.type];
+  const timeAgo = formatDistanceToNow(new Date(item.createdAt), { addSuffix: true });
 
   const getUploaderLabel = () => {
     if (!item.uploaderName) return "Anonymous";
@@ -71,107 +75,55 @@ export default function ContentItemCard({ item }: Props) {
   };
 
   return (
-    <div
-      className="overflow-hidden group/card transition-all duration-150"
-      style={{
-        background: "var(--color-surface)",
-        border: `1px solid ${item.isPinned ? "var(--color-brand)" : "var(--color-border)"}`,
-        borderRadius: "var(--radius-md)",
-        marginBottom: isCompact ? 0 : "0.75rem",
-      }}
-    >
-      <div className="flex items-center justify-between px-3.5 py-2"
-        style={{ borderBottom: "1px solid var(--color-border-soft)" }}
-      >
+    <div style={{
+      background: 'var(--bg-surface)',
+      border: '1px solid ' + (item.isPinned ? 'var(--accent)' : 'var(--border-subtle)'),
+      marginBottom: isCompact ? 0 : '0.75rem',
+    }}>
+      <div className="flex items-center justify-between px-3.5 py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <span className="inline-flex items-center gap-1 text-[0.65rem] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ background: config.bg, color: config.color }}
-          >
-            <Icon size={10} weight="bold" />
-            {config.label}
+          <span className="font-mono text-label" style={{ color: config.color, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            {config.icon()} {config.label}
           </span>
-
           {item.title && (
-            <span className="text-[0.85rem] font-semibold truncate max-w-[200px]"
-              style={{ color: "var(--color-text-primary)" }}
-            >
+            <span className="font-mono text-xs font-medium truncate max-w-[200px]" style={{ color: 'var(--text-primary)' }}>
               {item.title}
             </span>
           )}
-
           {!isCompact && item.itemExpiresAt && <ExpiryBadge expiresAt={item.itemExpiresAt} />}
         </div>
-
         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
           {!isCompact && (
-            <div className="flex flex-col items-end gap-0.5 mr-1.5">
-              <span className="text-[0.65rem]" style={{ color: "var(--color-text-muted)" }}>{timeAgo}</span>
-              <span className="text-[0.65rem] font-semibold px-1 py-0.5 rounded-[3px]"
-                style={{ background: "var(--color-surface-alt)", color: "var(--color-text-secondary)" }}
-              >
+            <div className="flex items-center gap-2 mr-2">
+              <span className="font-mono text-data" style={{ color: 'var(--text-muted)' }}>{timeAgo}</span>
+              <span className="font-mono text-data" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', padding: '1px 4px' }}>
                 {getUploaderLabel()}
               </span>
             </div>
           )}
-
           <div className={`flex items-center gap-0.5 ${isCompact ? "opacity-0 group-hover/card:opacity-100 transition-opacity" : ""}`}>
             {isCreator && (
-              <button
-                onClick={handlePin}
-                title={item.isPinned ? "Unpin" : "Pin to top"}
-                className="w-6 h-6 rounded-[4px] flex items-center justify-center transition-all duration-100"
-                style={{
-                  background: item.isPinned ? "var(--color-brand-soft)" : "transparent",
-                  color: item.isPinned ? "var(--color-brand)" : "var(--color-text-muted)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "var(--color-brand-soft)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--color-brand)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!item.isPinned) {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                  }
-                }}
+              <button onClick={handlePin}
+                className="font-mono text-label px-1.5 py-0.5"
+                style={{ color: item.isPinned ? 'var(--accent)' : 'var(--text-muted)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
+                onMouseLeave={(e) => { if (!item.isPinned) e.currentTarget.style.color = 'var(--text-muted)'; }}
               >
-                {item.isPinned ? <PushPin size={12} weight="fill" /> : <PushPinSlash size={12} weight="bold" />}
+                {item.isPinned ? "PINNED" : "PIN"}
               </button>
             )}
-
             {isCreator && (
-              <button
-                onClick={handleDelete}
-                title={confirmDelete ? "Click again to confirm" : "Delete"}
-                className="w-6 h-6 rounded-[4px] flex items-center justify-center transition-all duration-100"
-                style={{
-                  background: confirmDelete ? "rgba(220,38,38,0.08)" : "transparent",
-                  color: confirmDelete ? "var(--color-accent-red)" : "var(--color-text-muted)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(220,38,38,0.08)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--color-accent-red)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!confirmDelete) {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                  }
-                }}
+              <button onClick={handleDelete}
+                className="font-mono text-label px-1.5 py-0.5"
+                style={{ color: confirmDelete ? 'var(--error)' : 'var(--text-muted)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--error)'}
+                onMouseLeave={(e) => { if (!confirmDelete) e.currentTarget.style.color = 'var(--text-muted)'; }}
               >
-                <Trash size={12} weight="bold" />
+                {confirmDelete ? "CONFIRM?" : "DELETE"}
               </button>
             )}
           </div>
         </div>
-      </div>
-
-      <div className="sm:hidden flex items-center gap-2 px-3.5 pt-1.5 text-[0.65rem]"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        <span>{getUploaderLabel()}</span>
-        <span>\u00B7</span>
-        <span>{timeAgo}</span>
       </div>
 
       <div className={isCompact ? "p-3" : "p-3.5"}>
@@ -180,66 +132,48 @@ export default function ContentItemCard({ item }: Props) {
         {item.type === ContentType.IMAGE     && <ImageBlock item={item} />}
         {item.type === ContentType.PDF       && <PDFBlock   item={item} />}
         {item.type === ContentType.FILE_BLOB && <FileBlob   item={item} />}
+        {item.note && (
+          <p className="font-mono text-xs mt-3 italic" style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.5rem' }}>
+            {item.note}
+          </p>
+        )}
       </div>
 
       {isCompact && (
-        <div className="px-3 pb-2 flex items-center justify-between text-[0.6rem]"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          <span>{getUploaderLabel()} \u00B7 {timeAgo}</span>
+        <div className="px-3 pb-2 flex items-center justify-between font-mono text-data" style={{ color: 'var(--text-muted)' }}>
+          <span>{getUploaderLabel()} / {timeAgo}</span>
           {item.itemExpiresAt && <ExpiryBadge expiresAt={item.itemExpiresAt} />}
         </div>
       )}
 
-      <div className="px-3.5 pb-3 flex flex-wrap gap-1.5 items-center"
-        style={{ background: "var(--color-surface)" }}
-      >
-        <Tag size={12} style={{ color: "var(--color-text-muted)" }} weight="bold" />
-
+      <div className="px-3.5 pb-3 flex flex-wrap gap-1.5 items-center">
         {item.tags?.map((tag) => (
-          <span key={tag}
-            className="group/tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.65rem] font-semibold transition-colors"
-            style={{ background: "var(--color-surface-alt)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}
+          <span key={tag} className="group/tag inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-label"
+            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)' }}
           >
             #{tag}
-            <button onClick={() => handleRemoveTag(tag)}
-              className="opacity-0 group-hover/tag:opacity-100 transition-opacity"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              <X size={9} weight="bold" />
-            </button>
+            <button onClick={() => handleRemoveTag(tag)} style={{ color: 'var(--text-muted)' }}>×</button>
           </span>
         ))}
-
         {isAddingTag ? (
           <input
             autoFocus
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter")  handleAddTag();
-              if (e.key === "Escape") setIsAddingTag(false);
-            }}
+            onKeyDown={(e) => { if (e.key === "Enter") handleAddTag(); if (e.key === "Escape") setIsAddingTag(false); }}
             onBlur={handleAddTag}
-            placeholder="Tag\u2026"
-            className="text-[0.68rem] px-1.5 py-0.5 rounded-full outline-none w-16"
-            style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-brand)", color: "var(--color-text-primary)" }}
+            placeholder="Tag..."
+            className="font-mono text-xs px-1.5 py-0.5 outline-none w-16"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
           />
         ) : (
-          <button
-            onClick={() => setIsAddingTag(true)}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.65rem] font-semibold transition-all duration-100"
-            style={{ color: "var(--color-text-muted)", border: "1px dashed var(--color-border)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--color-brand)";
-              (e.currentTarget as HTMLElement).style.color = "var(--color-brand)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-              (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-            }}
+          <button onClick={() => setIsAddingTag(true)}
+            className="font-mono text-label px-1.5 py-0.5"
+            style={{ color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            <Plus size={9} weight="bold" /> Tag
+            + Tag
           </button>
         )}
       </div>

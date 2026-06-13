@@ -1,676 +1,259 @@
-# Instant Rooms
+# Drop
 
 > **Drop anything. Share instantly. No accounts required.**
 
-A premium, modern SaaS platform for frictionless content sharing. Create secure rooms in seconds, share a code, and seamlessly collaborate without friction.
-
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+A real-time, ephemeral content sharing platform. Create a room in one click, share the code, and collaborate — no signups, no friction.
 
 ---
 
-## 📋 Table of Contents
+## Features
 
-- [Overview](#overview)
-- [Key Features](#-key-features)
-- [Design Philosophy](#-design-philosophy)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-- [Development](#-development)
-- [API Reference](#-api-reference)
-- [Deployment](#-deployment)
-- [Testing](#-testing)
-- [Contributing](#-contributing)
-- [License](#-license)
+### Instant Rooms
+- Generate a unique room in one click
+- Optional custom room codes (upper + digits)
+- Share the code, anyone joins immediately
 
----
+### Content Types
+- **Text** — paste or type, auto-expand for long content
+- **Code** — auto-detected with Prism.js syntax highlighting (JS, TS, Python, Rust, Go, Java, PHP, CSS, SQL, Bash, JSON, HTML)
+- **Images** — drag-and-drop with inline preview and lightbox zoom
+- **PDFs** — inline page-by-page viewer with zoom
+- **Files** — any file up to 10MB, rendered as a downloadable blob
 
-## Overview
+### Access Controls
+- **Full Access** — view, upload, delete
+- **Read Only** — view only
+- **Drop Only** — upload only, cannot view room content
 
-Instant Rooms reimagines how teams share files and collaborate. Forget cumbersome logins, account creation, and security headaches. 
+### Lifecycle Management
+- Auto-delete per item: 1 hour / 6 hours / 24 hours
+- Room expiry: 1 hour / 24 hours / 7 days
+- Pin items or rooms to keep them indefinitely
 
-**Create a room in one click.** Share the code. **Drop your files, code, PDFs, or text.** It disappears when you're done.
+### Collaboration
+- Optional display name per upload
+- Uploader attribution on each item
+- Tag items with custom labels for filtering
 
-Perfect for:
-- 🎨 Design handoffs and feedback
-- 📝 Code snippets and documentation
-- 📊 Quick data sharing between teams
-- 💬 Temporary collaboration spaces
-- 🔐 Secure file exchanges (no accounts needed)
+### Note on Uploads
+- Attach a text note to any upload (file, text, or code)
+- Notes are displayed inline below the content
 
----
+### Upload Confirmation
+- Before any upload or text submission, a confirmation modal shows a summary (file names/sizes, content preview, title, note, tags, expiry)
+- Confirm or cancel before the upload goes through
 
-## 🌟 Key Features
+### Version History
+- Automatic snapshot-based version history
+- Restore entire room to any previous state
 
-### ⚡ Instant & Frictionless
-- Generate unique rooms in **one click**
-- No signups, no logins, no friction
-- 8-character secure, collision-safe alphanumeric codes
-- Share a code, start collaborating immediately
-
-### 🎨 Premium User Experience
-- Sleek, modern design inspired by premium SaaS tools
-- Sophisticated color palette with smooth transitions
-- Fluid micro-animations and polished interactions
-- Responsive across desktop, tablet, and mobile
-- Light and dark mode support
-
-### 📦 Multi-Format Content Support
-- **Text & Code**: Automatic syntax detection with Prism.js highlighting
-- **Images**: Integrated lightbox zoom and preview
-- **PDFs**: Native inline viewer for seamless document sharing
-- **Files**: Support for any file format up to 10MB
-- Smart format detection on paste
-
-### 🔐 Fine-Grained Access Control
-- **Full Access**: Complete read/write/delete permissions
-- **Read-Only**: View-only access for secure sharing
-- **Drop-Only**: Anonymous dropbox mode for collecting submissions
-- Customize per room in real-time
-
-### ⏱️ Intelligent Expiry Management
-- Configure auto-delete timings: 1 hour, 24 hours, 7 days
-- Pin content permanently if needed
-- Automatic data wiping—no trace left behind
-- Time-based lifecycle management
-
-### 📜 Version Control & History
-- Snapshot-based version history
-- Restore entire room to previous states
-- Track what changed and when
-- Revert unwanted changes instantly
-
-### 💾 Powerful Export System
-- Export as **ZIP archive** (all files bundled)
-- Export as **Markdown document** (text and metadata)
-- Export as **PDF** (structured report format)
-- Download and preserve room contents permanently
-
-### 🛡️ Security & Reliability
-- Per-IP rate limiting to prevent abuse
-- Strict MIME-type file validation
-- TypeScript for type-safe operations
-- Zod schema validation on all inputs
+### Export
+- Export room as ZIP archive
+- Export as Markdown document
+- Export as PDF report
 
 ---
 
-## 🎨 Design Philosophy
+## Design Philosophy
 
-Instant Rooms underwent a complete visual transformation to become a **premium, modern SaaS experience**. We moved beyond brutalist minimalism to create something genuinely beautiful and polished.
+**AFZAN brutalist-minimal** — utility-first, unapologetically raw.
 
-### Design Principles
-- **Depth & Elevation**: Layered shadows create visual hierarchy and sophistication
-- **Harmonious Colors**: A custom palette (Milk, Stone, Clay, Graphite) that translates seamlessly between light and dark themes
-- **Precision Typography**: Exclusive use of **Geist Mono** for a precise, developer-friendly aesthetic
-- **Smooth Interactions**: All micro-interactions are thoughtfully animated (200-300ms transitions)
-- **Whitespace**: Generous breathing room for clarity and elegance
+| Property | Value |
+|----------|-------|
+| Font | Geist Mono (monospace only) |
+| Accent | `#D42B2B` (red) |
+| Border radius | `0` (none) |
+| Shadows | `none` |
+| Icons | Inline `<svg>` elements using `currentColor` |
+| Transitions | Only interactive hovers (border/color changes) |
+| Theme | Dark first, with light mode via `[data-theme="light"]` |
 
-### Color System
-| Name | Light Mode | Dark Mode | Purpose |
-|------|-----------|-----------|---------|
-| **Milk** | #FFFFFF | #F1F5F9 | Primary backgrounds & text |
-| **Stone** | #E2E8F0 | #334155 | Borders & secondary surfaces |
-| **Clay** | #0052CC | #3B82F6 | Accent color for CTAs & highlights |
-| **Graphite** | #0F172A | #0F172A | Text & dark elements |
+### Color Tokens
+
+| Token | Dark | Light |
+|-------|------|-------|
+| `--bg-base` | `#0C0C0C` | `#FAFAFA` |
+| `--bg-surface` | `#141414` | `#F2F2F2` |
+| `--bg-elevated` | `#1C1C1C` | `#E8E8E8` |
+| `--border-subtle` | `#222222` | `#E0E0E0` |
+| `--border-default` | `#2E2E2E` | `#D0D0D0` |
+| `--text-primary` | `#F0EDE6` | `#0C0C0C` |
+| `--text-secondary` | `#8A8A8A` | `#5A5A5A` |
+| `--accent` | `#D42B2B` | `#D42B2B` |
+| `--accent-dim` | `#1F0A0A` | `#F5E0E0` |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | React 18 with TypeScript |
-| **Build Tool** | Vite (lightning-fast bundling) |
-| **Styling** | Tailwind CSS v3 (custom theme) |
-| **State** | Zustand (lightweight & performant) |
-| **Icons** | Phosphor Icons |
-| **File Upload** | react-dropzone |
-| **PDF Viewer** | react-pdf (PDF.js) |
-| **Code Syntax** | Prism.js with custom theme |
-| **Font** | Geist Mono (Google Fonts) |
+- **React 18** + **TypeScript**
+- **Vite** (build tool)
+- **Tailwind CSS v3** with custom CSS custom properties
+- **Zustand** (state management)
+- **react-dropzone** (file drag-and-drop)
+- **react-pdf** (PDF viewer)
+- **Prism.js** (syntax highlighting)
+- **date-fns** (relative time formatting)
+- **axios** (HTTP client)
+- **Geist Mono** (Google Fonts)
 
 ### Backend
-| Layer | Technology |
-|-------|-----------|
-| **Runtime** | Node.js 18+ |
-| **Framework** | Express.js |
-| **Language** | TypeScript |
-| **Validation** | Zod |
-| **File Upload** | Multer |
-| **Export** | archiver (ZIP), pdfkit (PDF) |
-| **Storage** | In-memory (Maps) + Local disk |
+- **Node.js** + **Express.js**
+- **TypeScript**
+- **Multer** (file uploads)
+- **Zod** (request validation)
+- **archiver** (ZIP export)
+- **pdfkit** (PDF export)
 
-### Database & Storage
-- **Current**: In-memory storage + local file system
-- **Scalable Alternative**: Upstash Redis + AWS S3 / Vercel Blob Storage
+### Storage
+- **In-memory** (content items, rooms, history snapshots)
+- **Local filesystem** (uploaded files in `../uploads/`)
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 instant-rooms/
-├── 📁 shared/
-│   └── types.ts                    # Shared TypeScript types (Client & Server)
-│
-├── 📁 server/
-│   ├── src/
-│   │   ├── index.ts                # Express.js entry point
-│   │   ├── routes/                 # REST API endpoints
-│   │   │   ├── rooms.ts            # Room CRUD operations
-│   │   │   ├── content.ts          # Content management
-│   │   │   └── export.ts           # Export functionality
-│   │   ├── services/               # Business logic layer
-│   │   │   ├── RoomService.ts
-│   │   │   ├── ContentService.ts
-│   │   │   └── ExportService.ts
-│   │   ├── middleware/             # Express middleware
-│   │   │   ├── rateLimiter.ts
-│   │   │   └── errorHandler.ts
-│   │   └── utils/
-│   │       ├── generateCode.ts
-│   │       └── validators.ts
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── 📁 client/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── LandingPage.tsx      # Hero & room creation
-│   │   │   └── RoomPage.tsx         # Main collaboration interface
-│   │   ├── components/              # Reusable UI components
-│   │   │   ├── Header.tsx
-│   │   │   ├── RoomCard.tsx
-│   │   │   ├── ContentBlock.tsx
-│   │   │   ├── FileUploadZone.tsx
-│   │   │   └── ...
-│   │   ├── store/
-│   │   │   └── roomStore.ts         # Zustand state management
-│   │   ├── styles.css               # Design system variables
-│   │   ├── utils/
-│   │   │   ├── api.ts
-│   │   │   └── helpers.ts
-│   │   └── tests/
-│   ├── index.html
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.ts
-│
-├── 📁 uploads/                      # Server-side file storage (Git-ignored)
-├── .gitignore
-├── .env.example
-└── README.md
+  shared/
+    types.ts               # Shared TypeScript types (client + server)
+
+  server/
+    src/
+      index.ts             # Express entry point
+      routes/
+        rooms.ts           # Room CRUD
+        content.ts         # Content management (text, code, file upload)
+        export.ts          # ZIP / Markdown / PDF export
+      services/
+        roomService.ts     # Room business logic
+        contentService.ts  # Content business logic
+        exportService.ts   # Export logic
+      middleware/
+        rateLimit.ts       # Per-IP rate limiting
+
+  client/
+    src/
+      pages/
+        LandingPage.tsx    # Hero, About, Features, FAQ, Footer
+        RoomPage.tsx       # Room layout (header + sidebar + timeline)
+      components/
+        layout/
+          Navbar.tsx       # Site navigation with SVG icons
+          ThemeToggle.tsx  # Dark/light toggle with sun/moon SVGs
+        room/
+          RoomHeader.tsx   # Room controls, view modes, access/expiry/export
+          DropZone.tsx     # File drop zone, text/code input, tags, note, auto-delete, confirmation modal
+          Timeline.tsx     # Content feed with tag filters
+          BoardView.tsx    # Kanban-style board layout
+          BoardColumn.tsx  # Single board column
+          HistoryPanel.tsx # Version history sidebar
+          QRModal.tsx      # Share QR code modal
+        content/
+          ContentItem.tsx  # Card wrapper with type badge, pin/delete, tags, note display
+          TextBlock.tsx    # Text content with copy + download (if fileUrl present)
+          CodeBlock.tsx    # Code content with syntax highlight, copy + download
+          ImageBlock.tsx   # Image preview with lightbox + download
+          PDFBlock.tsx     # PDF viewer with page nav, zoom, download
+          FileBlob.tsx     # Generic file download button
+          ExpiryBadge.tsx  # Countdown badge
+        ui/
+          Toast.tsx        # Notification toasts
+      hooks/
+        useTheme.ts        # Theme management (localStorage + prefers-color-scheme)
+        useCreator.ts      # Creator token verification
+        useGuestName.ts    # Guest display name
+      store/
+        roomStore.ts       # Zustand store for all room state
+      utils/
+        api.ts             # Axios API client
+        downloadFile.ts    # Cross-origin safe file download utility
+      styles.css           # All CSS custom properties, base styles, component styles
+    tailwind.config.ts     # Tailwind theme tokens
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- **Node.js**: v18 or higher ([Download](https://nodejs.org/))
-- **npm**: v9 or higher (comes with Node.js)
-- **Git**: For cloning the repository
+- Node.js 18+
+- npm 9+
 
-### Step 1: Clone the Repository
+### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/instant-rooms.git
-cd instant-rooms
+git clone https://github.com/afzanlearns/Drop.git
+cd Drop/instant-rooms
+
+# Install server
+cd server && npm install
+
+# Install client
+cd ../client && npm install
 ```
 
-### Step 2: Start the Backend Server
-```bash
-cd server
-npm install
-npm run dev
-```
-
-The backend will start on **`http://localhost:4000`**
-
-Uploaded files will be stored in `../uploads/` (auto-generated)
-
-### Step 3: Start the Frontend Client (New Terminal)
-```bash
-cd client
-npm install
-npm run dev
-```
-
-The frontend will start on **`http://localhost:5173`**
-
-### Step 4: Open in Browser
-Navigate to **`http://localhost:5173`** and start creating rooms!
-
----
-
-## 💻 Development
-
-### Available Scripts
-
-#### Frontend
-```bash
-cd client
-
-# Start development server with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build locally
-npm run preview
-
-# Run tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Lint code
-npm run lint
-```
-
-#### Backend
+### 2. Start Backend
 ```bash
 cd server
-
-# Start development server with auto-restart
 npm run dev
-
-# Build TypeScript
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
 ```
+Backend runs on `http://localhost:4000`
 
-### Environment Variables
-
-Create a `.env` file in the `server/` directory:
-
-```env
-# Server Configuration
-PORT=4000
-NODE_ENV=development
-LOG_LEVEL=debug
-
-# CORS Settings
-CORS_ORIGIN=http://localhost:5173
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# File Upload
-MAX_FILE_SIZE=10485760  # 10MB in bytes
-UPLOAD_DIR=../uploads
-
-# Optional: Cloud Storage (for production)
-# AWS_REGION=us-east-1
-# AWS_S3_BUCKET=your-bucket
-# AWS_ACCESS_KEY_ID=xxx
-# AWS_SECRET_ACCESS_KEY=xxx
-```
-
-### Hot Module Reload (HMR)
-Both frontend and backend support HMR. Changes to files will automatically refresh without losing state.
-
----
-
-## 📡 API Reference
-
-### Authentication
-All endpoints are public. Rate limiting is applied per IP address to prevent abuse.
-
-### Base URL
-- Development: `http://localhost:4000/api`
-- Production: `https://your-domain.com/api`
-
-### Rooms Endpoints
-
-#### Create a Room
-```http
-POST /api/rooms
-Content-Type: application/json
-
-{
-  "name": "My Collaboration Room",
-  "accessMode": "full"  // "full" | "read-only" | "drop-only"
-}
-
-Response: 201 Created
-{
-  "code": "XK7mH2p0",
-  "name": "My Collaboration Room",
-  "createdAt": "2024-01-15T10:30:00Z",
-  "expiresAt": "2024-01-16T10:30:00Z"
-}
-```
-
-#### Get Room Details
-```http
-GET /api/rooms/:code
-
-Response: 200 OK
-{
-  "code": "XK7mH2p0",
-  "name": "My Collaboration Room",
-  "accessMode": "full",
-  "itemCount": 5,
-  "createdAt": "2024-01-15T10:30:00Z",
-  "expiresAt": "2024-01-16T10:30:00Z"
-}
-```
-
-#### Update Access Mode
-```http
-PATCH /api/rooms/:code/access
-Content-Type: application/json
-
-{
-  "accessMode": "read-only"  // "full" | "read-only" | "drop-only"
-}
-
-Response: 200 OK
-```
-
-#### Update Expiry Duration
-```http
-PATCH /api/rooms/:code/expiry
-Content-Type: application/json
-
-{
-  "expiryDuration": "24h"  // "1h" | "24h" | "7d" | "never"
-}
-
-Response: 200 OK
-```
-
-#### Pin/Unpin Room
-```http
-PATCH /api/rooms/:code/pin
-Content-Type: application/json
-
-{
-  "pinned": true  // true | false
-}
-
-Response: 200 OK
-```
-
-#### Get Room History
-```http
-GET /api/rooms/:code/history
-
-Response: 200 OK
-{
-  "snapshots": [
-    {
-      "id": "snap_001",
-      "timestamp": "2024-01-15T10:30:00Z",
-      "itemCount": 3
-    },
-    ...
-  ]
-}
-```
-
-#### Restore Room to Snapshot
-```http
-POST /api/rooms/:code/restore
-Content-Type: application/json
-
-{
-  "snapshotId": "snap_001"
-}
-
-Response: 200 OK
-```
-
-### Content Endpoints
-
-#### Add Text or Code Block
-```http
-POST /api/content/text
-Content-Type: application/json
-
-{
-  "roomCode": "XK7mH2p0",
-  "content": "function hello() { console.log('world'); }",
-  "type": "code",  // "text" | "code"
-  "language": "javascript"  // Optional, auto-detected if omitted
-}
-
-Response: 201 Created
-{
-  "id": "content_123",
-  "type": "code",
-  "language": "javascript",
-  "content": "function hello() { ... }",
-  "createdAt": "2024-01-15T10:35:00Z"
-}
-```
-
-#### Upload File
-```http
-POST /api/content/upload
-Content-Type: multipart/form-data
-
-FormData:
-  - roomCode: "XK7mH2p0"
-  - file: <binary file data>
-
-Response: 201 Created
-{
-  "id": "content_124",
-  "type": "file",  // "image" | "pdf" | "file"
-  "filename": "design.pdf",
-  "size": 2048576,
-  "mimeType": "application/pdf",
-  "createdAt": "2024-01-15T10:36:00Z"
-}
-```
-
-#### List Room Content
-```http
-GET /api/content?roomCode=XK7mH2p0
-
-Response: 200 OK
-{
-  "items": [
-    {
-      "id": "content_123",
-      "type": "code",
-      "language": "javascript",
-      "content": "..."
-    },
-    {
-      "id": "content_124",
-      "type": "pdf",
-      "filename": "design.pdf"
-    }
-  ]
-}
-```
-
-#### Delete Content
-```http
-DELETE /api/content/:contentId
-
-Response: 204 No Content
-```
-
-### Export Endpoints
-
-#### Export as ZIP
-```http
-POST /api/export/:roomCode/zip
-
-Response: 200 OK
-Content-Type: application/zip
-<binary zip file>
-```
-
-#### Export as Markdown
-```http
-POST /api/export/:roomCode/md
-
-Response: 200 OK
-Content-Type: text/markdown
-# Room: XK7mH2p0
-...
-```
-
-#### Export as PDF
-```http
-POST /api/export/:roomCode/pdf
-
-Response: 200 OK
-Content-Type: application/pdf
-<binary pdf file>
-```
-
----
-
-## 🧪 Testing
-
-### Frontend Tests
+### 3. Start Frontend (new terminal)
 ```bash
 cd client
-npm test
+npm run dev
 ```
+Frontend runs on `http://localhost:5173`
 
-**Test Coverage**:
-- ✅ Room code uniqueness and entropy
-- ✅ Content storage integrity
-- ✅ Timeline chronological ordering
-- ✅ Access mode validation
-- ✅ Export functionality
-
-### Running Specific Tests
-```bash
-# Watch mode for active development
-npm test -- --watch
-
-# Coverage report
-npm test -- --coverage
-```
+### 4. Open in Browser
+Navigate to `http://localhost:5173` and create a room.
 
 ---
 
-## ☁️ Deployment
+## API Overview
 
-### ⚠️ Important Caveat
-This project currently uses **in-memory storage** and **local file system** for uploads. This works perfectly for testing and VPS deployments but is **not suitable for serverless** (Vercel, AWS Lambda) out of the box.
+### Rooms
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/rooms` | Create a room |
+| GET | `/api/rooms/:code` | Get room details |
+| PATCH | `/api/rooms/:code/access` | Change access mode |
+| PATCH | `/api/rooms/:code/expiry` | Update expiry duration |
+| PATCH | `/api/rooms/:code/pin` | Pin/unpin room |
+| GET | `/api/rooms/:code/history` | Get version snapshots |
+| POST | `/api/rooms/:code/restore` | Restore to snapshot |
 
-### Option 1: VPS Deployment (Recommended) ✅
+### Content
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/content/text` | Add text or code block (supports `note`) |
+| POST | `/api/content/upload` | Upload file (supports `note`) |
+| GET | `/api/content/:roomCode` | List room content |
+| PATCH | `/api/content/:id/pin` | Pin/unpin item |
+| PATCH | `/api/content/:id/tags` | Update tags |
+| DELETE | `/api/content/:id` | Delete item |
 
-Deploy to **Railway**, **Render**, **Fly.io**, or **DigitalOcean**:
-
-#### Step 1: Build Both Applications
-```bash
-# Build frontend
-cd client
-npm run build
-
-# Build backend
-cd server
-npm run build
-```
-
-#### Step 2: Serve Frontend via Express
-The backend can serve the built frontend as static files:
-
-```typescript
-// In server/src/index.ts
-app.use(express.static('../client/dist'));
-app.get('*', (req, res) => {
-  res.sendFile('../client/dist/index.html');
-});
-```
-
-#### Step 3: Deploy
-Push to your Git provider (GitHub, GitLab) and connect to Railway/Render.
-
-**Environment Variables** to set in your hosting platform:
-```
-PORT=4000
-NODE_ENV=production
-CORS_ORIGIN=https://your-domain.com
-```
-
-### Option 2: Serverless Deployment (Advanced) 🚀
-
-To deploy on **Vercel** or **AWS Lambda**, replace:
-1. **In-memory storage** → **Upstash Redis** or **Vercel Postgres**
-2. **Local file uploads** → **AWS S3** or **Vercel Blob Storage**
-
-Example with Vercel Blob:
-```typescript
-import { put, get } from '@vercel/blob';
-
-// Upload file
-const blob = await put(filename, file);
-
-// Retrieve file
-const file = await get(blobUrl);
-```
+### Export
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/export/:roomCode/zip` | Download ZIP |
+| POST | `/api/export/:roomCode/md` | Download Markdown |
+| POST | `/api/export/:roomCode/pdf` | Download PDF |
 
 ---
 
-## 🤝 Contributing
+## Deployment Notes
 
-We welcome contributions! Here's how to get started:
+Current storage is **in-memory + local filesystem**. Suitable for VPS/VM deployment.
 
-### 1. Fork the Repository
-```bash
-git clone https://github.com/yourusername/instant-rooms.git
-cd instant-rooms
-```
-
-### 2. Create a Feature Branch
-```bash
-git checkout -b feature/amazing-feature
-```
-
-### 3. Make Your Changes
-- Follow the existing code style
-- Write clear commit messages
-- Add tests for new functionality
-- Update documentation as needed
-
-### 4. Run Tests & Linting
-```bash
-cd client && npm test && npm run lint
-cd ../server && npm run lint
-```
-
-### 5. Push & Create a Pull Request
-```bash
-git push origin feature/amazing-feature
-```
-
-Then create a PR with a clear description of your changes.
-
-### Code Standards
-- ✅ Use TypeScript (no `any` types)
-- ✅ Write descriptive variable names
-- ✅ Add JSDoc comments for public functions
-- ✅ Keep components focused and single-responsibility
-- ✅ Use Zod for validation
+To make it serverless-ready, swap:
+- In-memory storage → Upstash Redis / Vercel KV
+- Local file storage → AWS S3 / Vercel Blob Storage
 
 ---
 
-<div align="center">
+## License
 
-**Made with ❤️ and TypeScript. No `any` types.**
-
-⭐ If you find Instant Rooms useful, please consider giving us a star on GitHub!
-
-</div>
+MIT

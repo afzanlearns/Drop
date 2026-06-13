@@ -9,16 +9,7 @@ import { uploadRateLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
-const uploadsDir = path.join(process.cwd(), "..", "uploads");
-
-const storage = multer.diskStorage({
-  destination: uploadsDir,
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = crypto.randomUUID();
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -154,16 +145,22 @@ router.post(
       }
     }
 
+    const fileId = crypto.randomUUID();
+    const ext = path.extname(req.file.originalname);
+    const filename = `${fileId}${ext}`;
+
     const serverBaseUrl = `${req.protocol}://${req.get("host")}`;
     const item = contentService.addFileContent(
       roomCode,
       req.file,
+      filename,
       serverBaseUrl,
       uploaderName,
       itemExpiresAt,
       parsedTags,
       note
     );
+    contentService.storeFileBuffer(filename, req.file.buffer, req.file.mimetype);
     roomService.addContentId(roomCode, item.id);
 
     res.status(201).json({ item });

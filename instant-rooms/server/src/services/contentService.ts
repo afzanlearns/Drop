@@ -4,6 +4,7 @@ import fs from "fs";
 
 const contentItems = new Map<string, ContentItem>();
 const versionHistory = new Map<string, VersionSnapshot[]>();
+const fileBuffers = new Map<string, { buffer: Buffer; mimeType: string }>();
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/png",
@@ -114,6 +115,7 @@ export const contentService = {
   addFileContent(
     roomCode: string,
     file: Express.Multer.File,
+    filename: string,
     serverBaseUrl: string,
     uploaderName?: string,
     itemExpiresAt?: string,
@@ -136,8 +138,8 @@ export const contentService = {
       type: contentType,
       title: file.originalname,
       content: null,
-      fileId: file.filename,
-      fileUrl: `${serverBaseUrl}/uploads/${file.filename}`,
+      fileId: filename,
+      fileUrl: `${serverBaseUrl}/uploads/${filename}`,
       note: note ?? null,
       metadata: {
         size: file.size,
@@ -211,7 +213,16 @@ export const contentService = {
     return item;
   },
 
+  storeFileBuffer(filename: string, buffer: Buffer, mimeType: string): void {
+    fileBuffers.set(filename, { buffer, mimeType });
+  },
+
+  getFileBuffer(filename: string): { buffer: Buffer; mimeType: string } | undefined {
+    return fileBuffers.get(filename);
+  },
+
   deleteFile(fileId: string): void {
+    fileBuffers.delete(fileId);
     try {
       const uploadsDir = path.join(process.cwd(), "..", "uploads");
       const filePath = path.join(uploadsDir, fileId);

@@ -77,13 +77,15 @@ export function uploadRateLimiter(req: Request, res: Response, next: NextFunctio
   next();
 }
 
-// Cleanup old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of store.entries()) {
-    if (now > entry.resetAt) store.delete(key);
-  }
-  for (const [key, entry] of uploadStore.entries()) {
-    if (now > entry.resetAt) uploadStore.delete(key);
-  }
-}, 5 * 60 * 1000);
+// Cleanup old entries periodically (local dev only)
+if (process.env.VERCEL !== "1") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of store.entries()) {
+      if (now > entry.resetAt) store.delete(key);
+    }
+    for (const [key, entry] of uploadStore.entries()) {
+      if (now > entry.resetAt) uploadStore.delete(key);
+    }
+  }, 5 * 60 * 1000);
+}

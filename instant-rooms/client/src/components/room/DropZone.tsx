@@ -1,13 +1,14 @@
 import { useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
-import { UploadSimple, Code, TextT, Plus, X, User, Timer, CaretDown, ArrowLeft } from "@phosphor-icons/react";
 import { useRoomStore } from "../../store/roomStore";
 import { useGuestName } from "../../hooks/useGuestName";
 import { useCreator } from "../../hooks/useCreator";
 import type { ItemExpiryOption } from "../../../../shared/types";
 
 type InputMode = "idle" | "text" | "code";
+
+type ConfirmKind = "files" | "text";
 
 const EXPIRY_OPTIONS: { value: ItemExpiryOption | 0; label: string }[] = [
   { value: 0,  label: "Never"    },
@@ -41,19 +42,18 @@ function TagInput({ tags, setTags }: { tags: string[]; setTags: (t: string[]) =>
   };
 
   return (
-    <div className="flex flex-wrap gap-1.5 min-h-[36px] p-1.5 rounded-[5px] transition-all"
-      style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
+    <div className="flex flex-wrap gap-1 min-h-[32px] p-1.5"
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
     >
       {tags.map((tag, i) => (
-        <span key={i}
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.68rem] font-semibold"
-          style={{ background: "var(--color-brand-soft)", color: "var(--color-brand)" }}
+        <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-xs"
+          style={{ background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
         >
           #{tag}
           <button onClick={() => setTags(tags.filter((_, j) => j !== i))}
-            className="opacity-60 hover:opacity-100 transition-opacity"
+            style={{ color: 'var(--text-muted)' }}
           >
-            <X size={9} weight="bold" />
+            ×
           </button>
         </span>
       ))}
@@ -62,17 +62,16 @@ function TagInput({ tags, setTags }: { tags: string[]; setTags: (t: string[]) =>
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={() => addTag(inputValue)}
-        placeholder={tags.length === 0 ? "Add tags\u2026" : ""}
-        className="flex-1 min-w-[80px] text-[0.8rem] outline-none bg-transparent"
-        style={{ color: "var(--color-text-primary)" }}
+        placeholder={tags.length === 0 ? "Add tags..." : ""}
+        className="flex-1 min-w-[60px] font-mono text-xs outline-none bg-transparent"
+        style={{ color: 'var(--text-primary)' }}
       />
     </div>
   );
 }
 
 function AutoDeleteSelector({
-  value,
-  onChange,
+  value, onChange,
 }: {
   value: ItemExpiryOption | 0;
   onChange: (v: ItemExpiryOption | 0) => void;
@@ -84,35 +83,30 @@ function AutoDeleteSelector({
     <div className="relative w-full">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full text-[0.82rem] px-3 py-2 rounded-[5px] transition-colors font-medium"
-        style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)", color: "var(--color-text-primary)" }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "var(--color-border-strong)")}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)")}
+        className="flex items-center justify-between w-full font-mono text-xs px-3 py-2"
+        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
       >
-        <span className="flex items-center gap-2">
-          <Timer size={14} weight="bold" style={{ color: "var(--color-text-secondary)" }} />
-          Auto-delete: <span style={{ color: "var(--color-brand)" }}>{currentLabel}</span>
+        <span>
+          Auto-delete: <span style={{ color: 'var(--accent)' }}>{currentLabel}</span>
         </span>
-        <CaretDown size={12} weight="bold" style={{ color: "var(--color-text-muted)" }} />
+        <span style={{ color: 'var(--text-muted)' }}>▾</span>
       </button>
-
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 right-0 bottom-full mb-1.5 z-20 p-1"
-            style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-xl)" }}
+          <div className="absolute left-0 right-0 bottom-full mb-1 z-20"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
           >
             {EXPIRY_OPTIONS.map((o) => (
               <button key={o.value}
                 onClick={() => { onChange(o.value as ItemExpiryOption | 0); setOpen(false); }}
-                className="w-full text-left px-3 py-2 text-[0.8rem] font-medium rounded-[4px] transition-colors"
-                style={{ background: value === o.value ? "var(--color-brand-soft)" : "transparent", color: value === o.value ? "var(--color-brand)" : "var(--color-text-primary)" }}
-                onMouseEnter={(e) => {
-                  if (value !== o.value) (e.currentTarget as HTMLElement).style.background = "var(--color-surface)";
+                className="w-full text-left px-3 py-2 font-mono text-xs"
+                style={{
+                  background: value === o.value ? 'var(--accent-dim)' : 'transparent',
+                  color: value === o.value ? 'var(--accent)' : 'var(--text-primary)',
                 }}
-                onMouseLeave={(e) => {
-                  if (value !== o.value) (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
+                onMouseEnter={(e) => { if (value !== o.value) e.currentTarget.style.background = 'var(--bg-surface)'; }}
+                onMouseLeave={(e) => { if (value !== o.value) e.currentTarget.style.background = 'transparent'; }}
               >
                 {o.label}
               </button>
@@ -130,24 +124,23 @@ export default function DropZone() {
   const [guestName, setGuestName] = useGuestName();
   const { isCreator } = useCreator(room?.code);
 
-  const [mode,          setMode]          = useState<InputMode>("idle");
-  const [textValue,     setTextValue]     = useState("");
-  const [title,         setTitle]         = useState("");
-  const [detectedAsCode,setDetectedAsCode]= useState(false);
-  const [itemExpiry,    setItemExpiry]    = useState<ItemExpiryOption | 0>(0);
-  const [tags,          setTags]          = useState<string[]>([]);
-  const [nameInput,     setNameInput]     = useState(guestName);
+  const [mode, setMode] = useState<InputMode>("idle");
+  const [textValue, setTextValue] = useState("");
+  const [title, setTitle] = useState("");
+  const [detectedAsCode, setDetectedAsCode] = useState(false);
+  const [itemExpiry, setItemExpiry] = useState<ItemExpiryOption | 0>(0);
+  const [tags, setTags] = useState<string[]>([]);
+  const [note, setNote] = useState("");
+  const [nameInput, setNameInput] = useState(guestName);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [confirm, setConfirm] = useState<{ kind: ConfirmKind; files?: File[] } | null>(null);
+
   const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      const expiry = itemExpiry === 0 ? undefined : (itemExpiry as ItemExpiryOption);
-      for (const file of acceptedFiles) {
-        await uploadFile(file, guestName || undefined, expiry, tags);
-      }
-      setTags([]);
+    (acceptedFiles: File[]) => {
+      setConfirm({ kind: "files", files: acceptedFiles });
     },
-    [uploadFile, guestName, itemExpiry, tags]
+    []
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -156,7 +149,7 @@ export default function DropZone() {
     maxSize: 10 * 1024 * 1024,
   });
 
-  const handlePaste     = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const text = e.clipboardData.getData("text");
     if (text) setDetectedAsCode(detectCode(text));
   };
@@ -167,25 +160,38 @@ export default function DropZone() {
     if (val.length > 30) setDetectedAsCode(detectCode(val));
   };
 
-  const handleSubmitText = async () => {
-    const content = textValue.trim();
-    if (!content) return;
+  const handleRequestConfirmText = () => {
+    if (!textValue.trim()) return;
+    setConfirm({ kind: "text" });
+  };
+
+  const handleConfirm = async () => {
+    if (!confirm) return;
+    setConfirm(null);
     const expiry = itemExpiry === 0 ? undefined : (itemExpiry as ItemExpiryOption);
-    await addTextContent({
-      type:            detectedAsCode ? "code" : "text",
-      content,
-      title:           title.trim() || undefined,
-      uploaderName:    guestName || undefined,
-      itemExpiryHours: expiry,
-      tags,
-    });
-    setTextValue(""); setTitle(""); setMode("idle");
-    setDetectedAsCode(false); setItemExpiry(0); setTags([]);
+    if (confirm.kind === "files" && confirm.files) {
+      for (const file of confirm.files) {
+        await uploadFile(file, guestName || undefined, expiry, tags, note || undefined);
+      }
+      setTags([]); setNote("");
+    } else if (confirm.kind === "text") {
+      await addTextContent({
+        type: detectedAsCode ? "code" : "text",
+        content: textValue.trim(),
+        title: title.trim() || undefined,
+        uploaderName: guestName || undefined,
+        itemExpiryHours: expiry,
+        tags,
+        note: note.trim() || undefined,
+      });
+      setTextValue(""); setTitle(""); setMode("idle");
+      setDetectedAsCode(false); setItemExpiry(0); setTags([]); setNote("");
+    }
   };
 
   const handleCancel = () => {
     setMode("idle"); setTextValue(""); setTitle("");
-    setDetectedAsCode(false); setItemExpiry(0); setTags([]);
+    setDetectedAsCode(false); setItemExpiry(0); setTags([]); setNote("");
   };
 
   const openTextMode = (forceCode = false) => {
@@ -198,70 +204,46 @@ export default function DropZone() {
     setGuestName(nameInput);
   };
 
-  const sectionLabel: React.CSSProperties = {
-    fontSize: "0.68rem",
-    fontWeight: 600,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-    color: "var(--color-text-muted)",
-    marginBottom: "0.375rem",
-  };
-
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--color-bg)" }}>
-      <div className="p-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
-        <p style={sectionLabel}>Posting as</p>
-        <div className="flex items-center gap-2 px-2.5 py-2 rounded-[5px] transition-all"
-          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-        >
-          <User size={14} weight="bold" style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+    <div className="flex flex-col h-full" style={{ background: 'var(--bg-surface)' }}>
+      <div className="p-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <p className="font-mono text-label uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Posting as</p>
+        <div className="flex items-center gap-2 px-2.5 py-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
           <input
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onBlur={handleSaveName}
             onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); }}
-            placeholder="Your name\u2026"
+            placeholder="Your name..."
             maxLength={100}
-            className="flex-1 text-[0.85rem] font-medium bg-transparent border-none outline-none"
-            style={{ color: "var(--color-text-primary)" }}
+            className="flex-1 font-mono text-xs bg-transparent border-none outline-none"
+            style={{ color: 'var(--text-primary)' }}
           />
         </div>
       </div>
 
-      <div className="p-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
+      <div className="p-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div {...getRootProps()}
-          className="rounded-[8px] py-6 px-4 text-center cursor-pointer transition-all duration-150 mb-3"
+          className="py-6 px-4 text-center cursor-pointer mb-3"
           style={{
-            border: `1.5px dashed ${isDragActive ? "var(--color-brand)" : "var(--color-border)"}`,
-            background: isDragActive ? "var(--color-brand-soft)" : "var(--color-surface)",
+            border: '1px dashed ' + (isDragActive ? 'var(--accent)' : 'var(--border-default)'),
+            background: isDragActive ? 'var(--accent-dim)' : 'var(--bg-elevated)',
           }}
         >
           <input {...getInputProps()} />
           {isUploading ? (
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-7 h-7 rounded-full border-2 animate-spin"
-                style={{ borderColor: "var(--color-border)", borderTopColor: "var(--color-brand)" }}
-              />
-              <p className="text-[0.75rem] font-medium" style={{ color: "var(--color-text-secondary)" }}>
-                Uploading\u2026
-              </p>
-            </div>
+            <p className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>Uploading...</p>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center"
-                style={{ background: isDragActive ? "var(--color-brand)" : "var(--color-surface-alt)" }}
-              >
-                <UploadSimple size={18} weight="bold"
-                  style={{ color: isDragActive ? "#fff" : "var(--color-brand)" }}
-                />
-              </div>
-              <p className="text-[0.85rem] font-semibold"
-                style={{ color: isDragActive ? "var(--color-brand)" : "var(--color-text-primary)" }}
-              >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ color: isDragActive ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <path d="M12 4V16M12 4L8 8M12 4L16 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4 14V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <p className="font-mono text-xs uppercase tracking-wider" style={{ color: isDragActive ? 'var(--accent)' : 'var(--text-primary)' }}>
                 {isDragActive ? "Drop it!" : "Drop files here"}
               </p>
               {!isDragActive && (
-                <p className="text-[0.7rem]" style={{ color: "var(--color-text-muted)" }}>
+                <p className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
                   Images, PDFs, any file up to 10MB
                 </p>
               )}
@@ -271,15 +253,13 @@ export default function DropZone() {
 
         {mode === "idle" ? (
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => openTextMode(false)}
-              className="btn-secondary flex items-center justify-center gap-2 py-2 text-[0.8rem]"
-            >
-              <TextT size={14} weight="bold" /> Text
+            <button onClick={() => openTextMode(false)} className="btn-secondary">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1.5" width="9" height="1.5" rx="0.3" fill="currentColor"/><rect x="1.5" y="4.5" width="7" height="1" rx="0.3" fill="currentColor"/><rect x="1.5" y="7.5" width="8" height="1" rx="0.3" fill="currentColor"/></svg>
+              Text
             </button>
-            <button onClick={() => openTextMode(true)}
-              className="btn-secondary flex items-center justify-center gap-2 py-2 text-[0.8rem]"
-            >
-              <Code size={14} weight="bold" /> Code
+            <button onClick={() => openTextMode(true)} className="btn-secondary">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 3L1.5 6L4 9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 3L10.5 6L8 9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M7.5 1.5L5 10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+              Code
             </button>
           </div>
         ) : (
@@ -288,83 +268,153 @@ export default function DropZone() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title (optional)"
-              className="input-field text-[0.85rem]"
+              className="input-field"
             />
-
             {detectedAsCode && (
-              <span className="inline-flex items-center gap-1.5 text-[0.65rem] font-semibold px-2 py-0.5 rounded-full w-fit"
-                style={{ background: "rgba(0,113,227,0.08)", color: "var(--color-accent-blue)" }}
-              >
-                <Code size={10} weight="bold" /> Code detected
-              </span>
+              <span className="font-mono text-label" style={{ color: 'var(--accent)' }}>CODE DETECTED</span>
             )}
-
             <textarea
               ref={textareaRef}
               value={textValue}
               onChange={handleTextChange}
               onPaste={handlePaste}
-              placeholder={mode === "code" ? "Paste your code here\u2026" : "Type or paste text\u2026"}
+              placeholder={mode === "code" ? "Paste your code here..." : "Type or paste text..."}
               rows={6}
-              className="w-full px-3 py-2 rounded-[5px] text-[0.85rem] outline-none resize-none transition-all"
+              className="w-full px-3 py-2 font-mono text-xs outline-none resize-none"
               style={{
-                background: detectedAsCode ? "#1A1A1A" : "var(--color-surface-alt)",
-                color: detectedAsCode ? "#EAEAEA" : "var(--color-text-primary)",
-                fontFamily: detectedAsCode ? "var(--font-mono)" : "var(--font-sans)",
-                border: "1px solid var(--color-border)",
+                background: detectedAsCode ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-default)',
               }}
-              onFocus={(e) => (e.target.style.borderColor = "var(--color-brand)")}
-              onBlur={(e)  => (e.target.style.borderColor = "var(--color-border)")}
+              onFocus={(e) => e.target.style.borderColor = 'var(--border-strong)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border-default)'}
             />
-
             <div className="flex gap-2">
               <button
-                onClick={handleSubmitText}
+                onClick={handleRequestConfirmText}
                 disabled={!textValue.trim() || isUploading}
-                className="btn-primary flex-1 justify-center py-2 text-[0.85rem]"
+                className="btn-primary flex-1"
               >
-                <Plus size={14} weight="bold" /> Add
+                Add
               </button>
-              <button onClick={handleCancel}
-                className="btn-ghost px-3 py-2"
-                style={{ border: "1px solid var(--color-border)" }}
-              >
-                <X size={15} weight="bold" />
+              <button onClick={handleCancel} className="btn-secondary">
+                Cancel
               </button>
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 flex flex-col gap-3" style={{ borderBottom: "1px solid var(--color-border)" }}>
+      <div className="p-4 flex flex-col gap-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <div>
+          <p className="font-mono text-label uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Note</p>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Add a note to your upload..."
+            maxLength={200}
+            className="input-field"
+          />
+        </div>
         {isCreator && (
           <div>
-            <p style={sectionLabel}>Auto-delete</p>
+            <p className="font-mono text-label uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Auto-delete</p>
             <AutoDeleteSelector value={itemExpiry} onChange={setItemExpiry} />
           </div>
         )}
         <div>
-          <p style={sectionLabel}>Tags</p>
+          <p className="font-mono text-label uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Tags</p>
           <TagInput tags={tags} setTags={setTags} />
         </div>
       </div>
 
       {mode === "idle" && (
         <div className="px-4 py-3 flex-1">
-          <p className="text-[0.75rem] text-center leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+          <p className="font-mono text-data text-center" style={{ color: 'var(--text-muted)' }}>
             You can also paste directly anywhere on the page
           </p>
         </div>
       )}
 
-      <div className="p-4 mt-auto" style={{ borderTop: "1px solid var(--color-border)" }}>
-        <button onClick={() => navigate("/")}
-          className="btn-ghost w-full justify-center py-2 text-[0.85rem] font-medium"
-          style={{ border: "1px solid var(--color-border)" }}
-        >
-          <ArrowLeft size={15} weight="bold" /> Back to home
+      <div className="p-4 mt-auto" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        <button onClick={() => navigate("/")} className="btn-ghost w-full" style={{ border: '1px solid var(--border-default)' }}>
+          Back to home
         </button>
       </div>
+
+      {confirm && (
+        <>
+          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setConfirm(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setConfirm(null)}
+          >
+            <div className="w-full max-w-sm" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <p className="font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Confirm upload</p>
+              </div>
+              <div className="px-4 py-3 space-y-2 max-h-[50vh] overflow-y-auto">
+                {confirm.kind === "files" && confirm.files?.map((f, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs font-mono"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    <span className="truncate">{f.name}</span>
+                    <span className="flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+                      ({(f.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                ))}
+                {confirm.kind === "text" && (
+                  <p className="font-mono text-xs whitespace-pre-wrap break-words max-h-28 overflow-y-auto"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    {textValue.trim().slice(0, 500)}{textValue.trim().length > 500 ? "..." : ""}
+                  </p>
+                )}
+                {title && (
+                  <div className="flex gap-2 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                    <span className="uppercase">Title:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{title}</span>
+                  </div>
+                )}
+                {note && (
+                  <div className="flex gap-2 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                    <span className="uppercase">Note:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{note}</span>
+                  </div>
+                )}
+                {tags.length > 0 && (
+                  <div className="flex gap-2 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                    <span className="uppercase">Tags:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((t) => (
+                        <span key={t} style={{ color: 'var(--accent)' }}>#{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {itemExpiry !== 0 && (
+                  <div className="flex gap-2 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                    <span className="uppercase">Auto-delete:</span>
+                    <span style={{ color: 'var(--accent)' }}>{EXPIRY_OPTIONS.find((o) => o.value === itemExpiry)?.label}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 px-4 py-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <button onClick={handleConfirm} disabled={isUploading}
+                  className="btn-primary flex-1"
+                >
+                  {isUploading ? "Uploading..." : "Confirm"}
+                </button>
+                <button onClick={() => setConfirm(null)} className="btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

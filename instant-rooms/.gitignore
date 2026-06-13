@@ -7,6 +7,7 @@ uploads/
 # Markdown files except README.md
 *.md
 !README.md
+.commandcode
 
 # Build output
 dist/
